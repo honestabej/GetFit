@@ -1,0 +1,14 @@
+@import '../../global.scss';
+
+.test-wrapper {
+  height: 150vh;
+  width: 100vw;
+  background-color: lightblue;
+}
+
+.test-component-wrapper {
+  height: 609px;
+  width: 100vw;
+  background-color: lightgreen;
+  display: flex;
+}

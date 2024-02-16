@@ -1,0 +1,33 @@
+@import './../../../global.scss';
+
+.add-button {
+  height: 50px;
+  width: 50px;
+  // Fixes the parent div to the bottom right of the page
+  position: fixed;
+  bottom: 5%;
+  right: 5%;
+  // Center the button inside of the parent div
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  button {
+    height: 90%;
+    width: 90%;
+    border: 0px;
+    border-radius: 40px;
+    font-size: 22px;
+    cursor: pointer;
+    color: $lightBackgroundColor;
+    background: rgb(255,107,14);
+    background: linear-gradient(145deg, rgba(255,107,14,1) 0%, rgba(255,145,75,1) 21%, rgba(255,178,56,1) 100%);
+    transition: 0.3s ease all;
+    
+    &:hover {
+      cursor: pointer;
+      height: 100%;
+      width: 100%;
+    }
+  }
+}

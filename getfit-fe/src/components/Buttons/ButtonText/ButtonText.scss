@@ -1,0 +1,57 @@
+@import './../../../global.scss';
+
+.button-text {
+  // Keep 100% so that div that component can dynamically change button height/width
+  height: 100%;
+  width: 100%;
+
+  input {
+    // Keep 100% so that div that component can dynamically change button height/width
+    height: 100%;
+    width: 100%;
+    font-size: 17px;
+    font-weight: 600;
+    padding-left: 0px;
+    cursor: pointer;
+    background: none;
+    border: 0px;
+    transition: 0.3s ease all;
+
+    // Default color if color prop is not passed in correctly
+    color: black;
+    
+    &:hover {
+      color: darkgrey;
+    }
+  }
+}
+
+.bt-black {
+  input {
+    color: black;
+
+    &:hover {
+      color: rgb(111, 111, 111);
+    }
+  }
+}
+
+.bt-red {
+  input {
+    color: $redButton;
+
+    &:hover {
+      color: lightcoral;
+    }
+  }
+}
+
+.bt-white {
+  input {
+    color: white;
+
+    &:hover {
+      color: rgb(133, 134, 146);
+    }
+  }
+}

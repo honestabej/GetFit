@@ -1,0 +1,43 @@
+@import './../../../global.scss';
+
+.simple-input-container {
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+.simple-input-overlay {
+  height: 15px;
+}
+
+.simple-input {
+  height: calc(100% - 13px);
+  width: 100%;
+  border: none;
+  padding: 0px 5px;
+  background-color: rgba($color: #f5f6f7, $alpha: 0.0);
+  color: white;
+  font-size: 20px;
+  outline: none;
+  transition: all 0.3s ease;
+
+  &:focus {
+    
+  }
+}
+
+.simple-input-overlay-text {
+  height: 100%;
+  position: absolute;
+  color: white;
+  font-size: 25px;
+  transform: translate(5px, -41px);
+  transition: all 0.3s ease;
+}
+
+.simple-input:focus ~ .simple-input-overlay-text, 
+.simple-input:not(:placeholder-shown) ~ .simple-input-overlay-text {
+  font-size: 15px;
+  font-weight: 600;
+  transform: translate(5px, -50px);
+}

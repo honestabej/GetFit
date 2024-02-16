@@ -1,0 +1,75 @@
+@import './../../../global.scss';
+
+.button-fill {
+  // Keep 100% so that div that component can dynamically change button height/width
+  height: 100%;
+  width: 100%;
+  text-align: center;
+
+  input {
+    // Keep 100% so that div that component can dynamically change button height/width
+    height: 100%;
+    width: 100%;
+    font-size: 18px;
+    font-weight: bold;
+    padding-left: 0px;
+    cursor: pointer;
+    outline: none;
+    padding: 5px 10px;
+    border-radius: $buttonRadius;
+    border: none;
+    transition: 0.3s ease all;
+
+    // Default color to black if color prop is not passed in properly
+    background: black;
+    color: white;
+
+    &:hover {
+      background: $blackButtonHover;
+    }
+  }
+}
+
+.bf-black {
+  input {
+    background: black;
+    color: white;
+
+    &:hover {
+      background: $blackButtonHover;
+    }
+  }
+}
+
+.bf-red {
+  input {
+    background: $redButton;
+    color: white;
+
+    &:hover {
+      background: rgb(255, 89, 89);
+    }
+  }
+}
+
+.bf-white {
+  input {
+    background: white;
+    color: black;
+
+    &:hover {
+      background: rgb(133, 134, 146);
+    }
+  }
+}
+
+.bf-orange {
+  input {
+    background: linear-gradient(145deg, rgba(255,107,14,1) 0%, rgba(255,145,75,1) 21%, rgba(255,178,56,1) 100%);
+    color: white;
+
+    &:hover {
+      background: linear-gradient(145deg, rgba(255,107,14,1) 0%, rgba(255,145,75,1) 21%, rgba(255,178,56,1) 100%);
+    }
+  }
+}

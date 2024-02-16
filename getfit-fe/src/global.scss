@@ -1,0 +1,57 @@
+// Site colors
+// Use these together for appropriate affect
+$lightBackgroundColor: #f5f6f7;
+$lightBackgroundImage: linear-gradient(54deg, rgba(255, 131, 122, 0.25), rgba(255, 131, 122, 0) 28%), linear-gradient(241deg, rgba(239, 152, 207, .25), rgba(239, 152, 207, 0) 36%);
+$darkBackgroundColor: #1d1d1d;
+$darkBackgroundImage: radial-gradient(circle at 100% 100%, rgba(122, 167, 255, .32), rgba(0, 0, 0, 0) 44%), radial-gradient(circle at 0 100%, rgba(255, 1, 1, .15), rgba(0, 0, 0, 0) 32%);
+
+// Site button properties
+$buttonHeight: 40px;
+$buttonRadius: 8px;
+$blackButtonHover: rgb(51, 56, 63);
+$redButton: rgb(235, 87, 80);
+$redButtonHover: rgb(255, 89, 89);
+
+// Site screensize cutoffs
+$smallDevices: 390px; // Small devices like phones (640px and up)
+$mediumDevices: 672px; // Medium devices such as tablets (768px and up) 
+$largeDevices: 990px; // Large devices such as laptops (1024px and up)
+$largestDevices: 1296px; // Largest devices such as desktops (1280px and up) 
+//EX: 
+.class {
+  // Default styles and anything really large (screen > 1296px) 
+
+  @media screen and (max-width: $largestDevices) {
+    // Styles for largestDevices (1296px > screen > 990px)
+  }
+
+  @media screen and (max-width: $largeDevices) {
+    // Styles for largeDevices (990px > screen > 672px)
+  }
+
+  @media screen and (max-width: $mediumDevices) {
+    // Styles for mediumDevices (672px > screen > 390px)
+  }
+
+  @media screen and (max-width: $smallDevices) {
+    // Styles for smallDevices (390px > screen)
+  }
+}
+
+// Site spacing
+$headerHeight: 80px;
+$footerHeight: 100px;
+
+// General styles
+.vertical-line {
+  height: 80%;
+  width: 1px;
+  background-color: lightgray;
+}
+
+.horizontal-line {
+  height: 1px;
+  width: 80%;
+  background-color: lightgray;
+  margin: 5px 0px;
+}

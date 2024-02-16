@@ -1,0 +1,182 @@
+### Create User (VERIFIED WORKING)
+POST http://localhost:3001/users/create
+Content-Type: application/json
+
+{
+  "username": "test1",
+  "email": "test1@gmail.com",
+  "password": "password",
+  "name": "test1",
+  "picture": null,
+  "age": 23
+}
+
+### User login (VERIFIED WORKING)
+POST http://localhost:3001/users/login
+Content-Type: application/json
+
+{
+  "emailUsername": "test1@gmail.com",
+  "password": "password"
+}
+
+### Get a User's current weight (VERIFIED WORKING)
+GET http://localhost:3001/users/weight
+Content-Type: application/json
+
+{
+  "userID": "u1"
+}
+
+### Get a User's current Goal (VERIFIED WORKING)
+GET http://localhost:3001/users/goal&userID='u1'
+Content-Type: application/json
+
+{
+  "userID": "u1"
+}
+
+### OLD Update User info (VERIFIED WORKING)
+PUT http://localhost:3001/users/update-info
+Content-Type: application/json
+
+{
+  "userID": "u1",
+  "name": "Abe J",
+  "age": 25,
+  "email": "sanityiuy@gmail.com",
+  "goal": 180.0,
+  "weight": 181.0
+}
+
+### Update User Info
+PUT http://localhost:3001/users/update-user-info
+Content-Type: application/json
+
+{
+  "userID": "u1",
+  "name": "Abe",
+  "age": "age",
+  "email": "email"
+}
+
+
+### Update User password (VERIFIED WORKING)
+PUT http://localhost:3001/users/update-password
+Content-Type: application/json
+
+{
+  "userID": "u1",
+  "password": "password"
+}
+
+### Add an Exercise (VERIFIED WORKING)
+POST http://localhost:3001/exercise/create
+Content-Type: application/json
+
+{
+  "userID": "u1",
+  "name": "Katana extension",
+  "category": "Arms",
+  "sets": 3,
+  "reps": 12,
+  "weight": 15.0
+}
+
+### Update an Exercise
+PUT http://localhost:3001/exercise/update
+Content-Type: application/json
+
+{
+  "exerciseID": "e1",
+  "name": "TEST 4",
+  "category": "Core",
+  "sets": 8,
+  "reps": 8,
+  "weight": 81.0
+}
+
+### Delete an Exercise (VERIFIED WORKING)
+DELETE http://localhost:3001/exercise/delete
+Content-Type: application/json
+
+{
+  "exerciseID": "e1"
+}
+
+### Get all Exercises of a User (VERIFIED WORKING)
+GET http://localhost:3001/exercise/get-all
+Content-Type: application/json
+
+{
+  "userID": "u1"
+}
+
+### Get all Exercises of a User with a specific Category (VERIFIED WORKING)
+GET http://localhost:3001/exercise/get-category
+Content-Type: application/json
+
+{
+  "userID": "u1",
+  "category": "Arms"
+}
+
+### Add a Workout (VERIFIED WORKING)
+POST http://localhost:3001/workout/create
+Content-Type: application/json
+
+{
+  "name": "Day 2",
+  "userID": "u1"
+}
+
+### Delete a Workout (VERIFIED WORKING)
+DELETE http://localhost:3001/workout/delete
+Content-Type: application/json
+
+{
+  "workoutID": "98762c72-7428-43bc-bac0-0367772aed08"
+}
+
+### Get all Workouts of a User (VERIFIED WORKING)
+GET http://localhost:3001/workout/get-all
+Content-Type: application/json
+
+{
+  "userID": "u1"
+}
+
+### Add an Exercise to a Workout (VERIFIED WORKING)
+POST http://localhost:3001/workout/add-exercise
+Content-Type: application/json
+
+{
+  "workoutID": "w1",
+  "exerciseID": "e10"
+}
+
+### Remove an Exercise from a Workout (VERIFIED WORKING)
+DELETE http://localhost:3001/workout/delete-exercise
+Content-Type: application/json
+
+{
+  "workoutID": "w1",
+  "exerciseID": "e10"
+}
+
+### Get all Exercises of a User's Workout (VERIFIED WORKING)
+GET http://localhost:3001/workout/get-exercises
+Content-Type: application/json
+
+{
+  "workoutID": "w1",
+  "userID": "u1"
+}
+
+### Test
+POST http://localhost:3001/test-login
+Content-Type: application/json
+
+{
+  "userID": "u1"
+}

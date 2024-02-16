@@ -1,0 +1,157 @@
+@import './../../global.scss';
+
+.home-wrapper {
+  height: 100vh;
+  min-height: calc(780px + $headerHeight);
+  background-color: $darkBackgroundColor;
+  background-image: $darkBackgroundImage;
+
+  @media screen and (max-width: $mediumDevices) {
+    min-height: calc(560px + $headerHeight + 25px);
+  }
+
+  @media screen and (max-width: $smallDevices) {
+    min-height: calc(560px + $headerHeight + 25px);
+  }
+}
+
+.home-container {
+  height: calc(100vh - $headerHeight);
+  min-height: 750px;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  @media screen and (max-width: $mediumDevices) {
+    min-height: 560px;
+  }
+
+  @media screen and (max-width: $smallDevices) {
+    min-height: 560px;
+  }
+}
+
+.home-display {
+  height: 100%;
+  min-height: 750px;
+  width: 100%;
+  max-width: $largestDevices;
+  display: flex;
+  position: relative;
+  align-items: center;
+  margin-bottom: 25px;
+
+  @media screen and (max-width: $mediumDevices) {
+    min-height: 560px;
+  }
+
+  @media screen and (max-width: $smallDevices) {
+    min-height: 560px;
+  }
+}
+
+.home-text-container {
+  height: 100%;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  z-index: 2;
+
+  @media screen and (max-width: $largestDevices) {
+    margin: 0px 25px;
+    
+  }
+
+  @media screen and (max-width: $mediumDevices) {
+    text-align: center;
+  }
+}
+
+.home-main-text {
+  font-size: 150px;
+  font-weight: 750;
+  font-style: italic;
+  margin-bottom: 40px;
+
+  @media screen and (max-width: $largeDevices) {
+    max-width: 700px;
+  }
+
+  @media screen and (max-width: $mediumDevices) {
+    max-width: $mediumDevices;
+    font-size: 100px;
+  }
+
+  @media screen and (max-width: $smallDevices) {
+    max-width: $mediumDevices;
+    font-size: 75px;
+  }
+}
+
+.home-sub-text {
+  width: 80%;
+  font-size: 20px;
+  line-height: 30px;
+  font-weight: 450;
+  margin-bottom: 40px;
+
+  @media screen and (max-width: $largeDevices) {
+    width: 100%;
+    max-width: 700px;
+  }
+}
+
+.home-signup-container {
+  height: 50px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.home-signup {
+  height: 100%;
+  width: 80%;
+  border-radius: 12px;
+  padding: 6px;
+  color: rgb(51, 51, 51);
+  background-color: rgba($color: #f5f6f7, $alpha: 0.3);
+  border: 1px solid #e7ecf0;
+  display: flex;
+  justify-content: space-between;
+
+  @media screen and (max-width: $mediumDevices) {
+    width: 100%;
+  }
+}
+
+.home-signup-input {
+  height: 100%;
+  width: 77%;
+  max-width: calc(100% - 135px);
+
+  @media screen and (max-width: $largestDevices) {
+    
+  }
+}
+
+.home-signup-button {
+  height: 100%;
+  width: 20%;
+  min-width: 120px;
+}
+
+.home-img-container {
+  height: 750px;
+  position: absolute;
+  right: 0;
+}
+
+.home-img {
+  max-height: 100%;
+
+  @media screen and (max-width: $mediumDevices) {
+    display: none;
+  }
+}

@@ -1,0 +1,49 @@
+@import './../../global.scss';
+
+.footer-wrapper {
+  height: $footerHeight;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  background-color: rgb(230, 230, 230);
+  z-index: 1;
+}
+
+.footer-container {
+  height: $footerHeight;
+  width: 100vw;
+  max-width: $largestDevices;
+  display: flex;
+  justify-content: space-between;
+  padding: 0px 10px;
+}
+
+.footer-left {
+  height: 100%;
+}
+
+.footer-logo-container {
+  padding-top: 20px;
+}
+
+.footer-logo {
+  max-height: 100%;
+  max-width: 180px;
+  margin-bottom: 15px;
+}
+
+.footer-right {
+  height: 100%;
+}
+
+.footer-right-text {
+  padding-top: 30px;
+  color: black;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.footer-button {
+  width: min-content;
+  margin-top: 5px;
+}

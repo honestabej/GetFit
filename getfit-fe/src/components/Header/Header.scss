@@ -1,0 +1,161 @@
+@import './../../global.scss';
+
+.header-wrapper {
+  height: $headerHeight;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+}
+
+.header-container {
+  height: 100%;
+  width: 100%;
+  max-width: $largestDevices;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0px 20px;
+}
+
+.header-logo-wrapper {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-logo-img {
+  max-height: 50%;
+  max-width: 250px;
+  cursor: pointer;
+}
+
+.header-buttons-container {
+  height: 40px;
+  display: flex;
+}
+
+.header-button {
+  width: 100px;
+  margin-left: 5px;
+  display: flex;
+  justify-content: right;
+
+  button {
+    display: flex;
+    align-items: center;
+    transition: 0.3s ease all;
+    font-size: 1.25em;
+    background: none;
+    border: none;
+    z-index: 5;
+    
+    &:hover {
+      cursor: pointer;
+      color: darkgray;
+    }
+  }
+}
+
+.fa-black {
+  color: black;
+  transition: all 0.3s ease;
+
+  &:hover {
+    color: rgb(111, 111, 111);
+  }
+}
+
+.fa-white {
+  color: white;
+  transition: all 0.3s ease;
+
+  &:hover {
+    color: rgb(133, 134, 146);
+  }
+}
+
+.header-menu-background {
+  height: 100vh;
+  width: 100vw;
+  position: absolute;
+  top: 0;
+  background: rgba($color: black, $alpha: 0.7);
+  z-index: 3;
+  display: flex;
+  justify-content: right;
+
+  // animations
+  animation: fadeIn 0.3s;
+  -webkit-animation: fadeIn 0.3s; 
+}
+
+.header-menu-wrapper {
+  width: 100vw;
+  display: flex;
+  justify-content: right;
+  position: absolute;
+  top: 0;
+}
+
+.header-menu-container {
+  height: fit-content;
+  width: 200px;
+  z-index: 4;
+  padding: $headerHeight 0px 40px 0px;
+  background-color: white;
+  border-radius: 0px 0px 0px 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  // animations
+  animation: slideIn 0.3s;
+  -webkit-animation: slideIn 0.3s; 
+}
+
+.header-menu-button {
+  height: 40px;
+
+  &.bottom {
+    width: 150px;
+    margin-top: 15px;
+  }
+}
+
+// Animations for menu appearance
+@keyframes fadeIn {
+  0% {
+    opacity: 0.0;       
+  }
+  100% {
+    opacity: 1; 
+  }       
+}
+
+@-webkit-keyframes fadeIn {
+  0% {
+    opacity: 0.0;       
+  }
+  100% {
+    opacity: 1; 
+  }       
+}
+
+@keyframes slideIn {
+  0% {
+    transform: translateX(100%) 
+  }
+  100% {
+    transform: translateX(0%)  
+  }       
+}
+
+@-webkit-keyframes slideIn {
+  0% {
+    transform: translateX(100%) 
+  }
+  100% {
+    transform: translateX(0%)  
+  }        
+}
