@@ -23,5 +23,5 @@ TestResults.xml
 
 *.env
 
-./old-components/
-./old-pages/
+old-components/
+old-pages/
