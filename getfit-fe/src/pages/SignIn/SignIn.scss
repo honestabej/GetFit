@@ -1,2 +1,74 @@
 @import './../../global.scss';
 
+.signin-wrapper {
+  height: 100vh;
+  width: 100vw;
+  min-height: fit-content;
+  background-color: $darkBackgroundColor;
+  background-image: $darkBackgroundImage;
+}
+
+.signin-container {
+  height: 100%;
+  display: flex;
+  min-height: fit-content;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.signin-center {
+  margin: 25px 0px;
+}
+
+.signin-logo-container {
+  margin: 0px auto 10px auto;
+  width: 260px;
+}
+
+.signin-logo-img {
+  max-width: 260px;
+  cursor: pointer;
+}
+
+.signin-box-container {
+  width: 330px;
+  margin: auto;
+  background-color: white;
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+}
+
+.signin-box-main-text {
+  font-size: 23px;
+
+  h2 {
+    margin-top: 0px;
+  }
+}
+
+.signin-box-sub-text {
+  color: rgb(29,29,29);
+
+  p {
+    margin-top: 0px;
+  }
+
+  &.red {
+    color: red;
+  }
+}
+
+.signin-input {
+  height: 45px;
+  margin: 20px 0px;
+}
+
+.signin-btn {
+  height: 45px;
+  width: 100%;
+}
+
+.signin-forgot-pwd-btn {
+  margin-top: 30px;
+}

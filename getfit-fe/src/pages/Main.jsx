@@ -5,6 +5,7 @@ import Home from './Home/Home'
 import SignUp from './SignUp/SignUp'
 import SignIn from './SignIn/SignIn'
 import Profile from './Profile/Profile'
+import ForgotPassword from './ForgotPassword/ForgotPassword'
 import Test from './Test/Test'
 
 const Main = () => {
@@ -19,6 +20,7 @@ const Main = () => {
         <Route exact path='/signup' element={<SignUp email={email} />} />
         <Route exact path='/signin' element={<SignIn />} />
         <Route exact path='/profile' element={<Profile />} />
+        <Route exact path='/forgotpassword' element={<ForgotPassword />} />
         <Route exact path='/test' element={<Test email={email} />} />
       </Routes>
     </Router>

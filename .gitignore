@@ -2,3 +2,6 @@
 *.env
 old-components/
 old-pages/
+getfit-fe/node_modules/.cache/
+*.pack
+*.eslintcache

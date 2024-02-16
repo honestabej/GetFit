@@ -89,25 +89,25 @@ app.post('/users/create', async (req, res) => {
   let isDuplicateUsername = await checkDuplicateUsername(req, res)
 
   // Check for a duplicate email/username
-  if (!isDuplicateEmail && !isDuplicateUsername) {
+  if (!isDuplicateEmail && !isDuplicateUsername) { 
     client.query('BEGIN', async (err, result) => {
-      if(err) return rollback(client, res, "Error @: Beginning user creation -> "+err.message)
+      if(err) return rollback(client, res, {loggedIn: false, error: "Error creating user, please try again later", errNum: 1, errMsg: "Error @: Beginning user creation -> "+err.message}) // err1
       client.query(`INSERT INTO Users (userID, username, email, password, name, age) VALUES ('${userID}', '${user.username}', '${user.email}', '${hashedPwd}', '${user.name}', ${user.age});`, async (err, result) => {
-        if(err) return rollback(client, res, "Error @: Inserting new user info -> "+err.message)
+        if(err) return rollback(client, res, {loggedIn: false, error: "Error creating user, please try again later", errNum: 2, errMsg: "Error @: Inserting new user info -> "+err.message}) // err2
         client.query(`INSERT INTO Goals (userID, goalID, goal, weight, goalDate, weightDate) VALUES ('${userID}', '${goalID}', 0, 0, '${currentDate}', '${currentDate}');`, async (err, result) => {
           if(err) { 
-            return rollback(client, res, "Error @: Inserting new goal info -> "+err.message) 
+            return rollback(client, res, {loggedIn: false, error: "Error creating user, please try again later", errNum: 3, errMsg: "Error @: Inserting new goal info -> "+err.message})  // err3
           } else {
             client.query('COMMIT')
             req.session.user = userID
-            logging(res, {loggedIn: true, user: req.session.user }, true)
+            logging(res, {loggedIn: true, user: req.session.user }, true) // good1
           }
         })
       })
     })
     client.end
   } else if (isDuplicateEmail == "error" || isDuplicateUsername == "error") {
-    logging(res, "Error checking for duplicate email/username", false)
+    logging(res, {loggedIn: false, error: "Error creating user, please try again later", errNum: 4, errMsg: "Error @: Checking for duplicate email/username"}, false) // err4
   } else {
     // Alert user if duplicate was email, username, or both
     var msg = ''
@@ -120,7 +120,7 @@ app.post('/users/create', async (req, res) => {
       msg = 'username'
     }
 
-    logging(res, "User with that "+msg+" already exists", true)
+    logging(res, {loggedIn: false, error: "User with that "+msg+" already exists" }, true) // good2
   }
 })
 
@@ -182,10 +182,9 @@ app.post('/users/login', async (req, res) => {
         if (response.rows[0] !== undefined){
           // Verify the given password and retrieved password match
           if (await bcrypt.compare(user.password, JSON.parse(JSON.stringify(response.rows[0])).password)) {
-            // TODO send back to user
             console.log("Successful login") 
-            req.session.user = response
-            logging(res, {loggedIn: true, user: req.session.user.rows[0].userid }, true)
+            req.session.user = response.rows[0].userid
+            logging(res, {loggedIn: true, user: req.session.user }, true)
           } else {
             logging(res, "Incorrect Email/Username and Password", true)
           }
