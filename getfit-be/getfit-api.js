@@ -38,7 +38,7 @@ app.use(session({
   }
 }))
 
-// Function used for logging response or failure messages
+// Function used for logging responses or failure messages
 function logging(res, msg, success) {
   if (success) {
     res.status(200).send(msg)
