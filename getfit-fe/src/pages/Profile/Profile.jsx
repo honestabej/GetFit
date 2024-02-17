@@ -19,10 +19,18 @@ function Profile(props) {
     })
   })
 
+  const logout = () => {
+    axios.get("http://localhost:3001/users/logout").then(res => {
+      console.log("You have been logged out")
+      window.location.href = '/'
+    })
+  }
+
   return (
     <>
       Profile
       {loggedIn ? userID : "None"}
+      <button onClick={logout}> logout </button>
     </>
   )
 }

@@ -5,3 +5,5 @@ old-pages/
 getfit-fe/node_modules/.cache/
 *.pack
 *.eslintcache
+getfit-fe/node_modules/.cache/.eslintcache
+getfit-fe/node_modules/.cache/default-development/0.pack

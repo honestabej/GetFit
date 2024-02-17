@@ -27,8 +27,13 @@ function SignUp(props) {
 
   // Send signup details to server
   const signUp = (name, age, email, username, password, confirmPassword) => {
+    // Reset error message
+    setErrorMessage('')
+
+    // Ensure that all fields are filled out
     if (name !== '' && age !== '' && email !== '' && username !== '' && password !== '' && confirmPassword !== '') {
-      if (password === confirmPassword){
+      let isValid = validateInputs(name, age, email, username, password, confirmPassword)
+      if (isValid) {
         axios.post("http://localhost:3001/users/create", {
           "name": name,
           "age": age,
@@ -44,12 +49,71 @@ function SignUp(props) {
             setErrorMessage(res.data.error)
           }
         })
-      } else {
-        setErrorMessage('Passwords do not match')
-      }
+      } 
     } else {
       setErrorMessage('Please fill out all fields')
     }
+  }
+
+  // Validate that inputs are valid types/lengths/etc
+  const validateInputs = (name, age, email, username, password, confirmPassword) => {
+    // Validate that name has no numbers, isnt too long, and capitalize properly
+    var hasNumber = /\d/
+    if (hasNumber.test(name)) {
+      setErrorMessage('Name cannot contain numbers')
+      return false
+    }
+    
+    if (name.length > 90) {
+      setErrorMessage('Name is too long')
+      return false
+    }
+
+    const nameSplit = name.split(' ')
+    for (let i = 0; i < nameSplit.length; i++) {
+      nameSplit[i] = nameSplit[i][0].toUpperCase() + nameSplit[i].substr(1)
+    }
+    name = nameSplit.join(' ')
+
+    // Validate that age contains only numbers
+    var isNumber = /^\d+$/
+    if (!isNumber.test(age)) {
+      setErrorMessage('Invalid age')
+      return false
+    }
+
+    // Validate that email is actually an email and isnt too long
+    // eslint-disable-next-line
+    var isEmail = /^\s*[\w\-\+_]+(\.[\w\-\+_]+)*\@[\w\-\+_]+\.[\w\-\+_]+(\.[\w\-\+_]+)*\s*$/
+    if (!isEmail.test(email)) {
+      setErrorMessage('Invalid email')
+      return false
+    }
+
+    if(email.length > 90) {
+      setErrorMessage('Email is too long')
+      return false
+    }
+
+    // Verify that username isnt too long
+    if(username.length > 90) {
+      setErrorMessage('Username is too long')
+      return false
+    }
+
+    // Verify that password contains between 8 and 20 characters, a lowercase and capital letter, a number, a special character, and matches the confirmPassword
+    var isValidPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/
+    if (!isValidPassword.test(password)) {
+      setErrorMessage('Password does not fit criteria')
+      return false
+    }
+
+    if (password !== confirmPassword) {
+      setErrorMessage('Passwords do not match')
+      return false
+    }
+
+    return true
   }
 
   // Update values from inputs
@@ -110,6 +174,9 @@ function SignUp(props) {
             </div>
             <div className="signup-input">
               <DefaultInput placeholder="Confirm Password" type="password" onChange={confirmPasswordInput} />
+            </div>
+            <div className="signup-password-text">
+              Password must contain between 8 & 20 characters, a lowercase & capital letter, a number, and a special character (!@#$%^&*?)
             </div>
             <div className="signup-btn">
               <ButtonFill value="Sign Up" color="black" onClick={() => signUp(name, age, email, username, password, confirmPassword)} />
