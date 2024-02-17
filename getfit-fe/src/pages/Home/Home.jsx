@@ -34,7 +34,7 @@ function Home(props) {
 
   return (
     <div className="home-wrapper">
-      <Header loggedIn={loggedIn} color={"fa-white"} />
+      <Header loggedIn={loggedIn} color={"fa-white"} white={true} />
       <div className="home-container">
         <div className="home-display">
           <div className="home-text-container">

@@ -1,7 +1,9 @@
 import './Header.scss'
 import React, { useState, useEffect } from 'react'
-import LargeLogo from './../../images/GetFit_Logo_White.png'
-import SmallLogo from './../../images/GetFit_Logo_White_Small.png'
+import LargeLogoWhite from './../../images/GetFit_Logo_White.png'
+import LargeLogo from './../../images/GetFit_Logo.png'
+import SmallLogoWhite from './../../images/GetFit_Logo_White_Small.png'
+import SmallLogo from './../../images/GetFit_Logo_Small.png'
 import ButtonText from '../Buttons/ButtonText/ButtonText'
 import ButtonNoFill from '../Buttons/ButtonNoFill/ButtonNoFill'
 import ButtonFill from '../Buttons/ButtonFill/ButtonFill'
@@ -60,10 +62,18 @@ const Header = (prop) => {
     <div className="header-wrapper">
       <div className="header-container">
         <div className="header-logo-wrapper">
-          {isWideLogo ?
-            <img className="header-logo-img" src={LargeLogo} alt="LOGO" onClick={() => {window.location.href = "/"}} />
-          :
-            <img className="header-logo-img" src={SmallLogo} alt="LOGO" onClick={() => {window.location.href = "/"}} />
+          {isWideLogo ? <>
+            {prop.white ? 
+              <img className="header-logo-img" src={LargeLogoWhite} alt="LOGO" onClick={() => {window.location.href = "/"}} /> 
+            : 
+              <img className="header-logo-img" src={LargeLogo} alt="LOGO" onClick={() => {window.location.href = "/"}} /> 
+            } </>
+          :<>
+            {prop.white ? 
+              <img className="header-logo-img" src={SmallLogoWhite} alt="LOGO" onClick={() => {window.location.href = "/"}} /> 
+            : 
+              <img className="header-logo-img" src={SmallLogo} alt="LOGO" onClick={() => {window.location.href = "/"}} />
+            }</>
           }
         </div>
         <div className="header-buttons-container">
