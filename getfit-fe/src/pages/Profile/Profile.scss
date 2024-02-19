@@ -5,4 +5,103 @@
   width: 100vw;
   background-color: $lightBackgroundColor;
   background-image: $lightBackgroundImage;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.profile-container {
+  height: 100%;
+  width: 100%;
+  max-width: $largestDevices;
+  box-sizing: border-box;
+  padding: 0px 20px;
+  display: flex;
+}
+
+.profile-info-wrapper {
+  height: 100%;
+  width: 400px;
+  box-sizing: border-box;
+  padding: 40px 10px 0px 10px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.profile-picture-wrapper {
+  height: 125px;
+  width: 125px;
+  border: 5px solid lightgray;
+  border-radius: 70px;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.profile-info-container {
+  height: 80px;
+  width: 90%;
+  margin: 20px 0px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  background-color: white;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 10px 0px;
+}
+
+.profile-info {
+  height: 80%;
+  width: 32%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.info {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.info-label {
+  font-size: 17px;
+}
+
+.profile-button {
+  height: 50px;
+  width: 100%;
+  margin: 5px 0px;
+  background-color: yellow;
+
+  button {
+    height: 100%;
+    width: 100%;
+    background-color: yellow;
+    border: none;
+
+    &:hover {
+      border-left: 5px solid orange;
+      border-right: 5px solid clear;
+    }
+    
+  }
+}
+
+.signout-button {
+  height: 45px;
+  width: 200px;
+  position: absolute;
+  bottom: 15px;
+}
+
+.profile-stats-wrapper {
+  height: 100%;
+  width: calc(100% - 400px);
+  box-sizing: border-box;
+  padding: 20px 10px 0px 10px;
 }

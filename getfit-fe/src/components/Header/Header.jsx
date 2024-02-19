@@ -51,9 +51,9 @@ const Header = (prop) => {
     setIsMenuOpen(!isMenuOpen)
 
     if (!isMenuOpen) {
-      setIcon(<i className={"fa-solid fa-xmark fa-xl fa-black"}></i>)
+      setIcon(<i className={"fa-solid fa-xmark fa-xl fa-"+prop.color}></i>)
     } else {
-      setIcon(<i className={"fa-solid fa-bars fa-xl "+prop.color}></i>)
+      setIcon(<i className={"fa-solid fa-bars fa-xl fa-"+prop.color}></i>)
     }
   }
 
