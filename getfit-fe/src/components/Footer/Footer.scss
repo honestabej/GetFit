@@ -3,6 +3,7 @@
 .footer-wrapper {
   height: $footerHeight;
   width: 100vw;
+  min-width: $minWidth;
   display: flex;
   justify-content: center;
   background-color: rgb(230, 230, 230);
@@ -12,9 +13,11 @@
 .footer-container {
   height: $footerHeight;
   width: 100vw;
+  min-width: $minWidth;
   max-width: $largestDevices;
   display: flex;
   justify-content: space-between;
+  box-sizing: border-box;
   padding: 0px 10px;
 }
 

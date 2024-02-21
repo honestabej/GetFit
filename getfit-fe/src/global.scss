@@ -41,6 +41,7 @@ $largestDevices: 1296px; // Largest devices such as desktops (1280px and up)
 // Site spacing
 $headerHeight: 80px;
 $footerHeight: 100px;
+$minWidth: 350px;
 
 // General styles
 .vertical-line {
@@ -49,9 +50,16 @@ $footerHeight: 100px;
   background-color: lightgray;
 }
 
+.vertical-line-two {
+  height: 100%;
+  width: 1px;
+  background-color: lightgray;
+}
+
 .horizontal-line {
   height: 1px;
-  width: 80%;
+  width: 100%;
   background-color: lightgray;
   margin: 5px 0px;
+  display: none;
 }

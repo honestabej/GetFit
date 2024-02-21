@@ -1,0 +1,19 @@
+@import './../../../global.scss';
+
+.info-container {
+  height: 80%;
+  width: 32%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.info {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.info-label {
+  font-size: 17px;
+}

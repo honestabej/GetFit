@@ -1,0 +1,27 @@
+@import './../../../global.scss';
+
+.workout-button {
+  height: 100%;
+  width: 100%;
+
+  button {
+    height: 100%;
+    width: 100%;
+    font-size: 17px;
+    font-weight: bold;
+    color: white;
+    border-radius: 25px;
+    border: none;
+    background: linear-gradient(145deg, rgba(255,107,14,1) 0%, rgba(255,145,75,1) 21%, rgba(255,178,56,1) 100%);
+    transition: 0.3s ease all;
+
+    i {
+      font-size: 20px;
+    }
+
+    &:hover {
+      cursor: pointer;
+      font-size: 18px;
+    }
+  }
+}

@@ -3,6 +3,7 @@
 .header-wrapper {
   height: $headerHeight;
   width: 100vw;
+  min-width: $minWidth;
   display: flex;
   justify-content: center;
 }
@@ -10,10 +11,12 @@
 .header-container {
   height: 100%;
   width: 100%;
+  min-width: $minWidth;
   max-width: $largestDevices;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  box-sizing: border-box;
   padding: 0px 20px;
 }
 

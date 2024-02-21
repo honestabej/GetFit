@@ -2,7 +2,13 @@ import './Profile.scss'
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import Header from '../../components/Header/Header'
-import ButtonNoFill from '../../components/Buttons/ButtonNoFill/ButtonNoFill'
+import ProfileInfo from '../../components/ProfileInfo/ProfileInfo'
+import ProfileButton from '../../components/Buttons/ProfileButton/ProfileButton'
+import WorkouButton from '../../components/Buttons/WorkoutButton/WorkoutButton'
+import DefaultProfile from '../../images/Default_Profile.jpg'
+import Exercises from '../../components/Profile/Exercises/Exercises'
+import Stats from '../../components/Profile/Stats/Stats'
+import Info from '../../components/Profile/Info/Info'
 
 function Profile(props) {
   // UseState variables for displaying info from the DB
@@ -11,6 +17,10 @@ function Profile(props) {
   const [userGoal, setUserGoal] = useState([])
   const [loggedIn, setLoggedIn] = useState(false)
   const [userID, setUserID] = useState('')
+  const [activeButton, setActiveButton] = useState(['active', '', '', ''])
+  const [width, setWidth] = useState(undefined)
+  const [arrowIcon, setArrowIcon] = useState(<></>)
+  const [right, setRight] = useState("My Exercises")
 
   useEffect(() => {
     // Check for current session
@@ -35,7 +45,44 @@ function Profile(props) {
         window.location.href = '/' // TODO: change to error page when created
       }
     })
-  }, [])
+
+    // Get width of window on load
+    setWidth(window.innerWidth)
+
+    // Set the width of the window for changing header icons
+    window.addEventListener('resize', () => setWidth(window.innerWidth))
+
+    // Handle arrow icon
+    if (width > 870) {
+      setArrowIcon(<i className="fa-solid fa-arrow-right arrow-display"></i>)
+    } else {
+      setArrowIcon(<i className="fa-solid fa-arrow-down arrow-display"></i>)
+    }
+
+    return () => {
+      window.removeEventListener('resize', () => setWidth(window.innerWidth))
+    }
+  }, [width])
+
+  const profileButtonClicked = (btn) => {
+    let arr = ['', '', '', '']
+    for (let i = 0; i < activeButton.length; i++) {
+      if (btn === i) {
+        arr[i] = 'active'
+      }
+    }
+    setActiveButton(arr)
+
+    if (btn === 0) {
+      setRight(<Exercises />)
+    } else if (btn === 1) {
+      setRight(<Stats />)
+    } else if (btn === 2) {
+      setRight(<Info />)
+    } else {
+      setRight("An Error Has Occurred"+userID) // TODO Remove userID
+    }
+  }
 
   const signOut = () => {
     axios.get("http://localhost:3001/users/logout").then(res => {
@@ -49,38 +96,39 @@ function Profile(props) {
       <Header loggedIn={loggedIn} white={false} />
       <div className="profile-container">
         <div className="profile-info-wrapper">
-          <div className="profile-picture-wrapper">
-          </div>
-          {userInfo.name}
-          <div className="profile-info-container">
-            <div className="profile-info">
-              <div className="info">{userInfo.age}</div>
-              <div className="info-label">Age</div>
+          <div className="profile-info-left">
+            <div className="profile-picture-wrapper">
+              <img className="profile-picture" src={DefaultProfile} alt="Profile"/>
             </div>
-            <div className="vertical-line"></div>
-            <div className="profile-info">
-              <div className="info">{userWeight.weight}</div>
-              <div className="info-label">Weight</div>
-            </div>
-            <div className="vertical-line"></div>
-            <div className="profile-info">
-              <div className="info">{userGoal.goal}</div>
-              <div className="info-label">Goal</div>
+            {userInfo.name}
+            <div className="profile-info-container">
+              <ProfileInfo age={userInfo.age} age_lbl={'Age'} weight={userWeight.weight} weight_lbl={'Weight'} goal={userGoal.goal} goal_lbl={'Goal'} />
             </div>
           </div>
-          <div className="profile-button">
-            <button><i class="fa-solid fa-dumbbell"></i> My Exercises</button>
-          </div>
-          <div className="profile-button">
-            <input value='Edit My Profile' type='submit' />
-          </div>
-          <div className="signout-button">
-            <ButtonNoFill value={'Sign Out'} color={'red'} onClick={signOut} />
+          <div className="profile-info-right">
+            <div className="profile-buttons-container">
+              <div className="profile-button-container">
+                <ProfileButton onClick={() => profileButtonClicked(0)} icon={<i className="fa-solid fa-dumbbell icon"></i>} value={'My Exercises'} arrow={arrowIcon} active={activeButton[0]} />
+              </div>
+              <div className="profile-button-container">
+                <ProfileButton onClick={() => profileButtonClicked(1)} icon={<i className="fa-solid fa-chart-simple icon"></i>} value={'My Stats'} arrow={arrowIcon} active={activeButton[1]} />
+              </div>
+              <div className="profile-button-container">
+                <ProfileButton onClick={() => profileButtonClicked(2)} icon={<i className="fa-solid fa-address-card icon"></i>} value={'My Info'} arrow={arrowIcon} active={activeButton[2]} />
+              </div>
+              <div className="profile-button-container">
+                <ProfileButton onClick={signOut} icon={<i className="fa-solid fa-right-from-bracket icon"></i>} value={'Sign Out'} arrow={''} active={activeButton[3]} color={'red'} />
+              </div>
+              <div className="profile-button-container workout">
+                <WorkouButton onClick={() => window.location.href = '/workout'} value={'Workout Now'} />
+              </div>
+            </div>
           </div>
         </div>
-        <div className="vertical-line"></div>
+        <div className="vertical-line-two"></div>
+        <div className="horizontal-line"></div>
         <div className="profile-stats-wrapper">
-          Stats coming soon
+          {right}
         </div>
       </div>
     </div>
