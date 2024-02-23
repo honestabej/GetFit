@@ -1,5 +1,101 @@
 @import './../../../global.scss';
 
 .info-wrapper {
-  
+  height: fit-content;
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.info-top-row {
+  height: 135px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.info-image-container {
+  height: 125px;
+  width: 125px;
+  border: 5px solid lightgray;
+  border-radius: 70px;
+  overflow: hidden;
+  position: relative;
+}
+
+.info-image-overlay {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  background: rgba($color: rgb(142, 141, 141), $alpha: 0.7);
+}
+
+.info-image {
+  height: 100%;
+  width: 100%;
+}
+
+.info-image-icon {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 25px;
+
+  input[type='file'] {
+    display: none;
+  }
+
+  i {
+    transition: ease 0.2s all;
+    
+    &:hover {
+      cursor: pointer;
+      font-size: 27px;
+    }
+  }
+}
+
+.info-name-container {
+  height: 70px;
+  width: calc(100% - 125px);
+  box-sizing: border-box;
+  padding-left: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.info-age-weight-goal-container {
+  height: 70px;
+  width: 100%;
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.info-age-weight-goal-input {
+  height: 100%;
+  width: 30%;
+}
+
+.info-email-container {
+  height: 70px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.info-save-button-container {
+  height: 45px;
+  width: 80%;
+  margin-top: 20px;
+}
+
+.info-error-message-container {
+  margin-top: 20px;
+  color: red;
 }

@@ -10,17 +10,40 @@ import Exercises from '../../components/Profile/Exercises/Exercises'
 import Stats from '../../components/Profile/Stats/Stats'
 import Info from '../../components/Profile/Info/Info'
 
+// Get the newly saved info from the database
+async function getInfo(userID, setUserInfo, setUserWeight, setUserGoal, setRight, saveInfo) {
+  let info = {name: '', email: '', age: 0, weight: 0, goal: 0}
+
+  await axios.get("http://localhost:3001/users?userID="+userID).then(res => {
+    setUserInfo(res.data[0])
+    info.name = res.data[0].name
+    info.email = res.data[0].email
+    info.age = res.data[0].age
+  })
+
+  await axios.get("http://localhost:3001/users/weight?userID="+userID).then(res => {
+    setUserWeight(res.data[0])
+    info.weight = res.data[0].weight
+  }) 
+
+  await axios.get("http://localhost:3001/users/goal?userID="+userID).then(res => {
+    setUserGoal(res.data[0])
+    info.goal = res.data[0].goal
+  }) 
+
+  setRight(<Info name={info.name} email={info.email} age={info.age} profilePicture={{}} weight={info.weight} goal={info.goal} saveInfo={saveInfo} />)
+}
+
 function Profile(props) {
-  // UseState variables for displaying info from the DB
-  const [userInfo, setUserInfo] = useState([])
-  const [userWeight, setUserWeight] = useState([])
-  const [userGoal, setUserGoal] = useState([])
+  const [userInfo, setUserInfo] = useState({})
+  const [userWeight, setUserWeight] = useState({})
+  const [userGoal, setUserGoal] = useState({})
   const [loggedIn, setLoggedIn] = useState(false)
   const [userID, setUserID] = useState('')
   const [activeButton, setActiveButton] = useState(['active', '', '', ''])
   const [width, setWidth] = useState(undefined)
   const [arrowIcon, setArrowIcon] = useState(<></>)
-  const [right, setRight] = useState("My Exercises")
+  const [right, setRight] = useState(<Exercises />)
 
   useEffect(() => {
     // Check for current session
@@ -64,6 +87,7 @@ function Profile(props) {
     }
   }, [width])
 
+  // Swap which component is rendered
   const profileButtonClicked = (btn) => {
     let arr = ['', '', '', '']
     for (let i = 0; i < activeButton.length; i++) {
@@ -78,9 +102,47 @@ function Profile(props) {
     } else if (btn === 1) {
       setRight(<Stats />)
     } else if (btn === 2) {
-      setRight(<Info />)
+      setRight(<Info name={userInfo.name} email={userInfo.email} age={userInfo.age} profilePicture={{}} weight={userWeight.weight} goal={userGoal.goal} saveInfo={saveInfo} />)
     } else {
-      setRight("An Error Has Occurred"+userID) // TODO Remove userID
+      setRight("An Error Has Occurred")
+    }
+  }
+
+  // Save new info to the database
+  const saveInfo = (name, email, age, weight, goal) => {
+    if (name !== userInfo.name || email !== userInfo.email || age !== userInfo.age) {
+      axios.put("http://localhost:3001/users/update-user-info", {
+        "userID": userID, 
+        "name": name,
+        "email": email,
+        "age": age
+      }, {
+        "content-type": "application/json"
+      }).then(res => {
+        getInfo(userID, setUserInfo, setUserWeight, setUserGoal, setRight, saveInfo)
+      })
+    }
+
+    if (weight !== userWeight.weight) {
+      axios.post("http://localhost:3001/users/update-weight", {
+        "userID": userID,
+        "weight": weight
+      }, {
+        "content-type": "application/json"
+      }).then(res => {
+        getInfo(userID, setUserInfo, setUserWeight, setUserGoal, setRight, saveInfo)
+      })
+    }
+
+    if (goal !== userGoal.goal) {
+      axios.post("http://localhost:3001/users/update-goal", {
+        "userID": userID,
+        "goal": goal
+      }, {
+        "content-type": "application/json"
+      }).then(res => {
+        getInfo(userID, setUserInfo, setUserWeight, setUserGoal, setRight, saveInfo)
+      })
     }
   }
 
@@ -127,7 +189,7 @@ function Profile(props) {
         </div>
         <div className="vertical-line-two"></div>
         <div className="horizontal-line"></div>
-        <div className="profile-stats-wrapper">
+        <div className="profile-display-wrapper">
           {right}
         </div>
       </div>

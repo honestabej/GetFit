@@ -160,12 +160,15 @@
   }
 }
 
-.profile-stats-wrapper {
+.profile-display-wrapper {
   height: 100%;
   width: calc(100% - 400px);
   box-sizing: border-box;
-  padding: 20px 10px 0px 10px;
+  padding: 50px 20px 0px 20px;
   display: flex;
-  align-items: center;
   justify-content: center;
+
+  @media screen and (max-width: 870px) {
+    width: 100%;
+  }
 }
