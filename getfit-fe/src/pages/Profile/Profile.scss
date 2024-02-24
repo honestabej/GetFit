@@ -2,8 +2,7 @@
 
 .profile-wrapper {
   height: 100vh;
-  max-height: fit-content;
-  min-height: calc(750px + $headerHeight);
+  min-height: fit-content;
   width: 100vw;
   min-width: 340px;
   background-color: $lightBackgroundColor;
@@ -14,7 +13,7 @@
 }
 
 .profile-container {
-  height: 100%;
+  min-height: fit-content;
   width: 100%;
   max-width: $largestDevices;
   box-sizing: border-box;
@@ -88,11 +87,12 @@
   border-radius: 70px;
   margin-bottom: 10px;
   overflow: hidden;
+  display: flex;
+  justify-content: center;
 }
 
 .profile-picture {
   height: 100%;
-  width: 100%;
 }
 
 .profile-info-container {
@@ -164,7 +164,7 @@
   height: 100%;
   width: calc(100% - 400px);
   box-sizing: border-box;
-  padding: 50px 20px 0px 20px;
+  padding: 50px 20px 50px 20px;
   display: flex;
   justify-content: center;
 

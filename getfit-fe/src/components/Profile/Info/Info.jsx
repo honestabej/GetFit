@@ -1,7 +1,7 @@
 import './Info.scss'
 import React, { useState } from 'react'
-import axios from 'axios'
-import DefaultProfile from '../../../images/Default_Profile.jpg'
+import { storage } from '../../../Firebase'
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import LabelInput from '../../Inputs/LineInput/LabelInput'
 import ButtonFill from '../../Buttons/ButtonFill/ButtonFill'
 
@@ -10,9 +10,12 @@ function Info(props) {
   const [age, setAge] = useState(props.age)
   const [email, setEmail] = useState(props.email)
   const [profilePicture, setProfilePicture] = useState(props.profilePicture)
+  const [profilePictureDisplay, setProfilePictureDisplay] = useState(props.profilePicture)
+  const [file, setFile] = useState(null)
   const [weight, setWeight] = useState(props.weight)
   const [goal, setGoal] = useState(props.goal)
   const [errorMessage, setErrorMessage] = useState('')
+  const [isNewProfilePicture, setIsNewProfilePicture] = useState(false)
 
   const nameChange = (e) => {
     if (e.target.value === '') {
@@ -26,24 +29,21 @@ function Info(props) {
     if (e.target.value === '') {
       setAge(props.age)
     } else {
-      setAge(e.target.value)
+      setAge(Number(e.target.value))
     }
   }
 
   const profilePictureChange = (e) => {
-    // console.log(e.target.files[0])
-    // if (e.target.value === '') {
-    //   setProfilePicture(props.profilePicture)
-    // } else {
-    //   setProfilePicture(e.target.files[0])
-    // }
+    setFile(e.target.files[0])
+    setProfilePictureDisplay(URL.createObjectURL(e.target.files[0]))
+    setIsNewProfilePicture(true)
   }
 
   const weightChange = (e) => {
     if (e.target.value === '') {
       setWeight(props.weight)
     } else {
-      setWeight(e.target.value)
+      setWeight(Number(e.target.value))
     }
   }
    
@@ -51,7 +51,7 @@ function Info(props) {
     if (e.target.value === '') {
       setGoal(props.goal)
     } else {
-      setGoal(e.target.value)
+      setGoal(Number(e.target.value))
     }
   }
 
@@ -63,13 +63,25 @@ function Info(props) {
     }
   }
 
-  const saveInfo = (name, email, age, weight, goal) => {
+  const saveInfo = (name, email, age, profilePicture, isNewProfilePicture, weight, goal) => {
     setErrorMessage('')
     let isValid = validateInputs(name, email, age, weight, goal)
 
     // Ensure inputs are correctly formatted
     if (isValid) {
-      props.saveInfo(name, email, age, weight, goal)
+      if (file !== null) {
+        // Only updates url in DB once, when changing from default pic. After that the url stays the same, but the image in Firebase is changed
+        const imageRef = ref(storage, `profilePictures/${props.userid}`)
+        uploadBytes(imageRef, file).then((snapshot) => {
+          getDownloadURL(snapshot.ref).then((url) => {
+            setProfilePicture(url)
+          }).then(() => {
+            props.saveInfo(name, email, age, profilePicture, isNewProfilePicture, weight, goal)
+          })
+        })
+      } else {
+        props.saveInfo(name, email, age, profilePicture, isNewProfilePicture, weight, goal)
+      }
     }
   }
 
@@ -133,12 +145,12 @@ function Info(props) {
       <div className="info-top-row">
         <div className="info-image-container">
           <div className="info-image-overlay"></div>
-          <img className="info-image" src={DefaultProfile} alt='Profile' />
+          <img className="info-image" src={profilePictureDisplay} alt='Profile' />
           <div className="info-image-icon">
             <label htmlFor="file-upload" className="info-file-upload">
               <i className="fa-solid fa-pen-to-square"></i>
             </label>
-            <input type="file" id="file-upload" onChange={profilePictureChange} />
+            <input type="file" id="file-upload" accept="image/*" onChange={profilePictureChange} />
           </div>
         </div>
         <div className="info-name-container">
@@ -160,7 +172,7 @@ function Info(props) {
         </div>
       </div>
       <div className="info-save-button-container">
-        <ButtonFill value={"Save Info"} color={"black"} onClick={() => saveInfo(name, email, age, weight, goal)} />
+        <ButtonFill value={"Save Info"} color={"black"} onClick={() => saveInfo(name, email, age, profilePicture, isNewProfilePicture, weight, goal)} />
       </div>
       <div className="info-error-message-container">
         {errorMessage}

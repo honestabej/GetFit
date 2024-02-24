@@ -19,7 +19,7 @@ const client = new Client({
 client.connect()
 app.listen(3001)
 
-// Settings for cookie/session use
+// Settings for server
 app.use(express.json())
 app.use(cors({
   origin: ['http://localhost:3000', 'http://localhost:3001'], 
@@ -37,11 +37,18 @@ app.use(session({
     expires: 6.048e+8
   }
 }))
+app.use(function (req, res, next) {
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE')
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type')
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  next()
+})
 
 // Function used for logging responses or failure messages
-function logging(res, msg, success) {
+function logging(res, send, msg, success) {
   if (success) {
-    res.status(200).send(msg)
+    res.status(200).send(send)
   } else {
     res.send(msg)
   } 
@@ -51,7 +58,7 @@ function logging(res, msg, success) {
 // Function for rollbacks
 var rollback = function(client, res, message) {
   client.query('ROLLBACK', function() {
-    logging(res, message, false)
+    logging(res, '', message, false)
     client.end
   })
 }
@@ -69,15 +76,6 @@ async function getCurrentDate() {
   return changeDate
 }
 
-// Add headers before the routes are defined
-app.use(function (req, res, next) {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  next();
-});
-
 // Create User
 app.post('/users/create', async (req, res) => {
   let user = req.body 
@@ -87,12 +85,13 @@ app.post('/users/create', async (req, res) => {
   const hashedPwd = await bcrypt.hash(user.password, 10)
   let isDuplicateEmail = await checkDuplicateEmail(req, res)
   let isDuplicateUsername = await checkDuplicateUsername(req, res)
+  let profilePicture = 'https://firebasestorage.googleapis.com/v0/b/getfit-5d057.appspot.com/o/profilePictures%2FDefault_Profile.jpg?alt=media&token=0e951429-ea98-4c8e-b4aa-ad69245c4324'
 
   // Check for a duplicate email/username
   if (!isDuplicateEmail && !isDuplicateUsername) { 
     client.query('BEGIN', async (err, result) => {
       if(err) return rollback(client, res, {loggedIn: false, error: "Error creating user, please try again later", errNum: 1, errMsg: "Error @: Beginning user creation -> "+err.message}) // err1
-      client.query(`INSERT INTO Users (userID, username, email, password, name, age) VALUES ('${userID}', '${user.username}', '${user.email}', '${hashedPwd}', '${user.name}', ${user.age});`, async (err, result) => {
+      client.query(`INSERT INTO Users (userID, username, email, password, name, age, profilePicture) VALUES ('${userID}', '${user.username}', '${user.email}', '${hashedPwd}', '${user.name}', ${user.age}, '${profilePicture}');`, async (err, result) => {
         if(err) return rollback(client, res, {loggedIn: false, error: "Error creating user, please try again later", errNum: 2, errMsg: "Error @: Inserting new user info -> "+err.message}) // err2
         client.query(`INSERT INTO Goals (userID, goalID, goal, weight, goalDate, weightDate) VALUES ('${userID}', '${goalID}', 0, 0, '${currentDate}', '${currentDate}');`, async (err, result) => {
           if(err) { 
@@ -100,14 +99,14 @@ app.post('/users/create', async (req, res) => {
           } else {
             client.query('COMMIT')
             req.session.user = userID
-            logging(res, {loggedIn: true, user: req.session.user }, true) // good1
+            logging(res, {loggedIn: true, user: req.session.user }, 'Successfully created user '+userID, true) // good1
           }
         })
       })
     })
     client.end
   } else if (isDuplicateEmail == "error" || isDuplicateUsername == "error") {
-    logging(res, {loggedIn: false, error: "Error creating user, please try again later", errNum: 4, errMsg: "Error @: Checking for duplicate email/username"}, false) // err4
+    logging(res, {loggedIn: false, error: "Error creating user, please try again later", errNum: 4, errMsg: "Error @: Checking for duplicate email/username"}, 'Error @: Checking for duplicate email/username', false) // err4
   } else {
     // Alert user if duplicate was email, username, or both
     var msg = ''
@@ -120,7 +119,7 @@ app.post('/users/create', async (req, res) => {
       msg = 'username'
     }
 
-    logging(res, {loggedIn: false, error: "User with that "+msg+" already exists" }, true) // good2
+    logging(res, {loggedIn: false, error: "User with that "+msg+" already exists" }, 'User with that '+msg+' already exists', true) // good2
   }
 })
 
@@ -138,7 +137,7 @@ async function checkDuplicateEmail(req, res) {
           resolve(false)
         }
       } else {
-        logging(res, "Error @: Checking for duplicate email -> "+err.message, false)
+        logging(res, '', "Error @: Checking for duplicate email -> "+err.message, false)
         resolve("error")
       }
     })
@@ -160,7 +159,7 @@ async function checkDuplicateUsername(req, res) {
           resolve(false)
         }
       } else {
-        logging(res, "Error @: Checking for duplicate username -> "+err.message, false)
+        logging(res, '', "Error @: Checking for duplicate username -> "+err.message, false)
         resolve("error")
       }
     })
@@ -184,20 +183,20 @@ app.post('/users/login', async (req, res) => {
           if (await bcrypt.compare(user.password, JSON.parse(JSON.stringify(response.rows[0])).password)) {
             console.log("Successful login") 
             req.session.user = response.rows[0].userid
-            logging(res, {loggedIn: true, user: req.session.user }, true)
+            logging(res, {loggedIn: true, user: req.session.user }, 'Login successful', true)
           } else {
-            logging(res, "Incorrect Email/Username and Password", true)
+            logging(res, '', "Incorrect Email/Username and Password", true)
           }
         } else {
-          logging(res, 'Could not find User\'s password', true)
+          logging(res, '', 'Could not find User\'s password', true)
         }
       } else {
-        logging(res, 'Error @ getting password for login ->'+err.message, false)
+        logging(res, '', 'Error @ getting password for login ->'+err.message, false)
       }
       client.end
     })
   } else {
-    logging(res, "Incorrect Email/Username and Password", true)
+    logging(res, '', "Incorrect Email/Username and Password", true)
   }
 })
 
@@ -241,7 +240,7 @@ async function findUser(req, res) {
           resolve(undefined)
         }
       } else {
-        logging(res, 'Error @ getting user for login ->'+err.message, false)
+        logging(res, '', 'Error @ getting user for login ->'+err.message, false)
         resolve(undefined)
       }
     })
@@ -251,9 +250,9 @@ async function findUser(req, res) {
 
 // Get a User's info
 app.get('/users', async (req, res) => {
-  client.query(`SELECT * FROM Users WHERE userID = '${req.query.userID}';`, async (err, result) => {
+  client.query(`SELECT userID, email, age, name, profilePicture FROM Users WHERE userID = '${req.query.userID}';`, async (err, result) => {
     if (!err) {
-      logging(res, result.rows, true)
+      logging(res, result.rows, 'User '+req.query.userID+' info retrieved successfully', true)
     } else {
       logging(res, "Error @: Getting user's info -> "+err.message, false)
     }
@@ -265,12 +264,12 @@ app.get('/users/weight', async (req, res) => {
   client.query(`SELECT weight, weightDate FROM Goals WHERE userID = '${req.query.userID}' AND weight IS NOT NULL ORDER BY weightDate DESC LIMIT 1;`, async (err, result) => {
     if (!err) {
       if(result.rows[0] !== undefined) {
-        logging(res, result.rows, true)
+        logging(res, result.rows, 'User '+req.query.userID+' weight retrieved successfully', true)
       } else {
-        logging(res, "Weight Not Retrieved", true)
+        logging(res, '', "Weight Not Retrieved", true)
       }
     } else {
-      logging(res, "Error @: Getting user's current weight -> "+err.message, false)
+      logging(res, '', "Error @: Getting user's current weight -> "+err.message, false)
     }
   })
   client.end
@@ -281,12 +280,12 @@ app.get('/users/goal', async(req, res) => {
   client.query(`SELECT goal, goalDate FROM Goals WHERE userID = '${req.query.userID}' AND goal IS NOT NULL ORDER BY goalDate DESC LIMIT 1;`, async (err, result) => {
     if (!err) {
       if(result.rows[0] !== undefined) {
-        logging(res, result.rows, true)
+        logging(res, result.rows, 'User '+req.query.userID+' goal retrieved successfully', true)
       } else {
-        logging(res, "Goal Not Retrieved", true)
+        logging(res, '', "Goal Not Retrieved", true)
       }
     } else {
-      logging(res, "Error @: Getting user's current goal -> "+err.message, false)
+      logging(res, '', "Error @: Getting user's current goal -> "+err.message, false)
     }
   })
   client.end
@@ -296,32 +295,32 @@ app.get('/users/goal', async(req, res) => {
 app.put('/users/update-user-info', async (req, res) => {
   let user = req.body
 
-  client.query(`UPDATE Users SET name = '${user.name}', age = ${user.age}, email = '${user.email}' WHERE userID = '${user.userID}';`, async (err, result) => {
+  client.query(`UPDATE Users SET name = '${user.name}', age = ${user.age}, email = '${user.email}', profilePicture = '${user.profilePicture}' WHERE userID = '${user.userID}';`, async (err, result) => {
     if (!err) {
-      logging(res, "Successfully updated User info here", true)
+      logging(res, '', "Successfully updated User info", true)
     } else {
-      logging(res, "Error @: Updating user info -> "+err.message, false)
+      logging(res, '', "Error @: Updating user info -> "+err.message, false)
     }
   })
   client.end
 })
 
-// Update User Password
+// Update User's Password
 app.put('/users/update-password', async (req, res) => {
   let user = req.body
   const hashedPwd = await bcrypt.hash(user.password, 10)
 
   client.query(`UPDATE Users SET password = '${hashedPwd}' WHERE userID = '${user.userID}';`, async (err, result) => {
     if(!err) {
-      logging(res, "Successfully updated User password", true)
+      logging(res, '', "Successfully updated User password", true)
     } else {
-      logging(res, "Error @: Updating user's password -> "+err.message, false)
+      logging(res, '', "Error @: Updating user's password -> "+err.message, false)
     }
   }) 
   client.end
 })
 
-// Update User Weight
+// Update User's Weight
 app.post('/users/update-weight', async (req, res) => {
   let user = req.body
   let goalID = uuid()
@@ -329,14 +328,14 @@ app.post('/users/update-weight', async (req, res) => {
 
   client.query(`INSERT INTO Goals (userID, goalID, weight, weightDate) VALUES ('${user.userID}', '${goalID}', ${user.weight}, '${currentDate}');`, async (err, result) => {
     if (!err) {
-      logging(res, "Successfully inserted new User weight", true)
+      logging(res, '', "Successfully inserted new User weight", true)
     } else {
-      logging(res, "Error @: Inserting new user weight -> "+err.message, false)
+      logging(res, '', "Error @: Inserting new user weight -> "+err.message, false)
     }
   })
 })
 
-// Update User Goal
+// Update User's Goal
 app.post('/users/update-goal', async (req, res) => {
   let user = req.body
   let goalID = uuid()
@@ -344,9 +343,9 @@ app.post('/users/update-goal', async (req, res) => {
 
   client.query(`INSERT INTO Goals (userID, goalID, goal, goalDate) VALUES ('${user.userID}', '${goalID}', ${user.goal}, '${currentDate}');`, async (err, result) => {
     if (!err) {
-      logging(res, "Successfully inserted new User goal", true)
+      logging(res, '', "Successfully inserted new User goal", true)
     } else {
-      logging(res, "Error @: Inserting new user goal -> "+err.message, false)
+      logging(res, '', "Error @: Inserting new user goal -> "+err.message, false)
     }
   })
 })
@@ -364,7 +363,7 @@ app.post('/exercise/create', async (req, res) => {
       if(err) return rollback(client, res, "Error @: Inserting new exercise info -> "+err.message)
       client.query(`INSERT INTO History (exerciseID, historyID, sets, reps, weight, changeDate) VALUES ('${exerciseID}', '${historyID}', ${user.sets}, ${user.reps}, ${user.weight}, '${changeDate}');`, async (err, result) => {
         if(!err) { 
-          logging(res, "Exercise created successfully", true)
+          logging(res, '', "Exercise created successfully", true)
           client.query('COMMIT')
         } else {
           return rollback(client, res, "Error @: Inserting new history info -> "+err.message) 
@@ -381,9 +380,9 @@ app.put('/exercise/update-info', async (req, res) => {
 
   client.query(`UPDATE Exercises SET name = '${user.name}' WHERE exerciseID = '${user.exerciseID}';`, async (err, result) => {
     if (!err) {
-      logging(res, "Exercise info updated ", true)
+      logging(res, '', "Exercise info updated ", true)
     } else {
-      logging(res, "Error @: Updating exercise info -> "+err.message, false)
+      logging(res, '', "Error @: Updating exercise info -> "+err.message, false)
     }
   })
   client.end
@@ -398,9 +397,9 @@ app.post('/exercise/update-history', async (req, res) => {
   client.query(`INSERT INTO History (exerciseID, historyID, sets, reps, weight, changeDate) VALUES 
     ('${user.exerciseID}', '${historyID}', ${user.sets}, ${user.reps}, ${user.weight}, '${currentDate}');`, async (err, result) => {
     if (!err) {
-      logging(res, "History info added successfully", true)
+      logging(res, '', "History info added successfully", true)
     } else {
-      logging(res, "Error @: Inserting history info -> "+err.message, false)
+      logging(res, '', "Error @: Inserting history info -> "+err.message, false)
     }
   })
 })
@@ -409,9 +408,9 @@ app.post('/exercise/update-history', async (req, res) => {
 app.delete('/exercise/delete', async (req, res) => {
   client.query(`DELETE FROM Exercises WHERE exerciseID = '${req.query.exerciseID}';`, async (err, result) => {
     if(!err) {
-      logging(res, "Exercise deleted successfully", true)
+      logging(res, '', "Exercise deleted successfully", true)
     } else {
-      logging(res, "Error @: Deleting exercise -> "+err.message, false)
+      logging(res, '', "Error @: Deleting exercise -> "+err.message, false)
     }
   })
   client.end
@@ -423,7 +422,7 @@ app.get('/exercise/get-all', async (req, res) => {
     (SELECT * FROM (SELECT * FROM Exercises WHERE userID = '${req.query.userID}') AS Temp1 JOIN History USING(exerciseID)) AS Temp2) 
     SELECT * FROM RecentHistory WHERE RowNum = 1;`, async (err, result) => {
     if (!err) {
-      logging(res, result.rows, true)
+      logging(res, 'User '+req.query.userID+' exercises retrieved successfully', true)
     } else {
       logging(res, "Error @: Getting exercises of user -> "+err.message, false)
     } 
@@ -437,9 +436,9 @@ app.get('/exercise/get-category', async (req, res) => {
     (SELECT * FROM (SELECT * FROM Exercises WHERE userID = '${req.query.userID}') AS Temp1 JOIN History USING(exerciseID)) AS Temp2) 
     SELECT * FROM RecentHistory WHERE RowNum = 1 AND category = '${req.query.category}';`, async (err, result) => {
     if (!err) {
-      logging(res, result.rows, true)
+      logging(res, result.rows, 'User '+req.query.userID+' exercises of category '+req.query.category+' retrieved successfully', true)
     } else {
-      logging(res, "Error @: Getting exercises of user with category -> "+err.message, false)
+      logging(res, '', "Error @: Getting exercises of user with category -> "+err.message, false)
     }
   })
   client.end
@@ -449,9 +448,9 @@ app.get('/exercise/get-category', async (req, res) => {
 app.get('/exercise/get-categories', async (req, res) => {
   client.query(`SELECT DISTINCT category FROM Exercises WHERE userid = '${req.query.userID}';`, async (err, result) => {
     if (!err) {
-      logging(res, result.rows, true)
+      logging(res, result.rows, 'User '+req.query.userID+' categories retrieved successfully', true)
     } else {
-      logging(res, "Error @: Getting categories -> "+err.message, false)
+      logging(res, '', "Error @: Getting categories -> "+err.message, false)
     }
   })
 })
@@ -463,9 +462,9 @@ app.post('/workout/create', async (req, res) => {
 
   client.query(`INSERT INTO Workouts (userID, workoutID, name) VALUES ('${user.userID}', '${workoutID}', '${user.name}');`, async (err, result) => {
     if (!err) {
-      logging(res, "Workout created successfully", true)
+      logging(res, '', "Workout created successfully", true)
     } else {
-      logging(res, "Error @: Inserting new workout info -> "+err.message, false)
+      logging(res, '', "Error @: Inserting new workout info -> "+err.message, false)
     }
   })
   client.end
@@ -475,9 +474,9 @@ app.post('/workout/create', async (req, res) => {
 app.delete('/workout/delete', async (req, res) => {
   client.query(`DELETE FROM Workouts WHERE workoutID = '${req.query.workoutID}';`, async (err, result) => {
     if (!err) {
-      logging(res, "Workout deleted successfully", true)
+      logging(res, '', "Workout deleted successfully", true)
     } else {
-      logging(res, "Error @: Deleting workout -> "+err.message, false)
+      logging(res, '', "Error @: Deleting workout -> "+err.message, false)
     }
   })
   client.end
@@ -487,9 +486,9 @@ app.delete('/workout/delete', async (req, res) => {
 app.get('/workout/get-all', async (req, res) => {
   client.query(`SELECT * FROM Workouts WHERE userID = '${req.query.userID}';`, async (err, result) => {
     if (!err) {
-      logging(res, result.rows, true)
+      logging(res, result.rows, 'User '+req.query.userID+' workouts retrieved successfully', true)
     } else {
-      logging(res, "Error @: Getting all user workouts -> "+err.message , false)
+      logging(res, '', "Error @: Getting all user workouts -> "+err.message , false)
     }
   })
   client.end
@@ -502,9 +501,9 @@ app.get('/workout/get-exercises', async (req, res) => {
     WHERE userID = '${req.query.userID}') AS Temp2 JOIN History USING(exerciseID)) AS Temp3) SELECT * FROM RecentHistory WHERE RowNum = 1) 
     AS Temp4 USING(exerciseID);`, async (err, result) => {
     if (!err) {
-      logging(res, result.rows, true)
+      logging(res, result.rows, 'User '+req.query.userID+' exercises of workout '+req.query.workoutID+' retrieved successfully', true)
     } else {
-      logging(res, "Error @: Getting all exercises of a user's workout -> "+err.message, false)
+      logging(res, '', "Error @: Getting all exercises of a user's workout -> "+err.message, false)
     }
   })
   client.end
@@ -516,9 +515,9 @@ app.post('/workout/add-exercise', async (req, res) => {
 
   client.query(`INSERT INTO WoEx (workoutID, exerciseID) VALUES ('${user.workoutID}', '${user.exerciseID}');`, async (err, result) => {
     if (!err) {
-      logging(res, "Exercise added to workout successfully", true)
+      logging(res, '', "Exercise added to workout successfully", true)
     } else {
-      logging(res, "Error @: Adding exercise to workout -> "+err.message, false)
+      logging(res, '', "Error @: Adding exercise to workout -> "+err.message, false)
     }
   })
   client.end
@@ -528,9 +527,9 @@ app.post('/workout/add-exercise', async (req, res) => {
 app.delete('/workout/delete-exercise', async (req, res) => {
   client.query(`DELETE FROM WoEx WHERE workoutID = '${req.query.workoutID}' AND exerciseID = '${req.query.exerciseID}';`, async (err, result) => {
     if (!err) {
-      logging(res, "Exercise deleted from workout successfully", true)
+      logging(res, '', "Exercise deleted from workout successfully", true)
     } else {
-      logging(res, "Error @: Deleting exercise from workout -> "+err.message, false)
+      logging(res, '', "Error @: Deleting exercise from workout -> "+err.message, false)
     }
   })
   client.end
@@ -540,9 +539,9 @@ app.delete('/workout/delete-exercise', async (req, res) => {
 app.get('/test', (req, res) => {
   client.query(`SELECT * FROM Users WHERE userID = '${req.query.userID}';`, (err, result) => {
     if (!err) {
-      logging(res, result.rows, true)
+      logging(res, result.rows, '', true)
     } else {
-      logging(res, "Error @: Test -> "+err.message, false)
+      logging(res, '', "Error @: Test -> "+err.message, false)
     }
   })
 }) 

@@ -4,7 +4,7 @@ CREATE TABLE Users (
     email VARCHAR(100), 
     password VARCHAR(100), 
     name VARCHAR(100), 
-    picture BIT(10000), 
+    profilePicture VARCHAR(500), 
     age INT, 
     PRIMARY KEY(userID)
 );

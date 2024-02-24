@@ -5,20 +5,23 @@ import Header from '../../components/Header/Header'
 import ProfileInfo from '../../components/ProfileInfo/ProfileInfo'
 import ProfileButton from '../../components/Buttons/ProfileButton/ProfileButton'
 import WorkouButton from '../../components/Buttons/WorkoutButton/WorkoutButton'
-import DefaultProfile from '../../images/Default_Profile.jpg'
+// import DefaultProfile from '../../images/Default_Profile.jpg'
 import Exercises from '../../components/Profile/Exercises/Exercises'
 import Stats from '../../components/Profile/Stats/Stats'
 import Info from '../../components/Profile/Info/Info'
 
 // Get the newly saved info from the database
-async function getInfo(userID, setUserInfo, setUserWeight, setUserGoal, setRight, saveInfo) {
-  let info = {name: '', email: '', age: 0, weight: 0, goal: 0}
+async function getInfo(userID, setUserInfo, setUserWeight, setUserGoal, setRight, saveInfo, setProfilePictureDisplay, isNewProfilePicture) {
+  let info = {name: '', email: '', age: 0, profilepicture: '', weight: 0, goal: 0}
+  if (isNewProfilePicture) setProfilePictureDisplay('')
 
   await axios.get("http://localhost:3001/users?userID="+userID).then(res => {
     setUserInfo(res.data[0])
     info.name = res.data[0].name
     info.email = res.data[0].email
     info.age = res.data[0].age
+    info.profilepicture = res.data[0].profilepicture
+    setProfilePictureDisplay(res.data[0].profilepicture)
   })
 
   await axios.get("http://localhost:3001/users/weight?userID="+userID).then(res => {
@@ -31,7 +34,7 @@ async function getInfo(userID, setUserInfo, setUserWeight, setUserGoal, setRight
     info.goal = res.data[0].goal
   }) 
 
-  setRight(<Info name={info.name} email={info.email} age={info.age} profilePicture={{}} weight={info.weight} goal={info.goal} saveInfo={saveInfo} />)
+  setRight(<Info userid={userID} name={info.name} email={info.email} age={info.age} profilePicture={info.profilepicture} weight={info.weight} goal={info.goal} saveInfo={saveInfo} />)
 }
 
 function Profile(props) {
@@ -40,6 +43,7 @@ function Profile(props) {
   const [userGoal, setUserGoal] = useState({})
   const [loggedIn, setLoggedIn] = useState(false)
   const [userID, setUserID] = useState('')
+  const [profilePictureDisplay, setProfilePictureDisplay] = useState()
   const [activeButton, setActiveButton] = useState(['active', '', '', ''])
   const [width, setWidth] = useState(undefined)
   const [arrowIcon, setArrowIcon] = useState(<></>)
@@ -55,13 +59,14 @@ function Profile(props) {
       if (res.data.loggedIn) {
         axios.get("http://localhost:3001/users?userID="+res.data.user).then(res => {
           setUserInfo(res.data[0])
+          setProfilePictureDisplay(res.data[0].profilepicture)
         })
         
         axios.get("http://localhost:3001/users/weight?userID="+res.data.user).then(res => {
           setUserWeight(res.data[0])
         })
 
-        axios.get("http://localhost:3001/users/goal?userID="+res.data.user).then(res => {
+        axios.get("http://localhost:3001/users/goal?userID="+res.data.user).then(res => { 
           setUserGoal(res.data[0])
         })
       } else {
@@ -102,24 +107,27 @@ function Profile(props) {
     } else if (btn === 1) {
       setRight(<Stats />)
     } else if (btn === 2) {
-      setRight(<Info name={userInfo.name} email={userInfo.email} age={userInfo.age} profilePicture={{}} weight={userWeight.weight} goal={userGoal.goal} saveInfo={saveInfo} />)
+      setRight(<Info userid={userID} name={userInfo.name} email={userInfo.email} age={userInfo.age} profilePicture={userInfo.profilepicture} weight={userWeight.weight} goal={userGoal.goal} saveInfo={saveInfo} />)
     } else {
       setRight("An Error Has Occurred")
     }
   }
 
   // Save new info to the database
-  const saveInfo = (name, email, age, weight, goal) => {
-    if (name !== userInfo.name || email !== userInfo.email || age !== userInfo.age) {
+  const saveInfo = (name, email, age, profilePicture, isNewProfilePicture, weight, goal) => {
+    
+
+    if (name !== userInfo.name || email !== userInfo.email || age !== userInfo.age || profilePicture !== userInfo.profilepicture || isNewProfilePicture) {
       axios.put("http://localhost:3001/users/update-user-info", {
         "userID": userID, 
         "name": name,
         "email": email,
-        "age": age
+        "age": age, 
+        "profilePicture": profilePicture
       }, {
         "content-type": "application/json"
       }).then(res => {
-        getInfo(userID, setUserInfo, setUserWeight, setUserGoal, setRight, saveInfo)
+        getInfo(userID, setUserInfo, setUserWeight, setUserGoal, setRight, saveInfo, setProfilePictureDisplay, isNewProfilePicture)
       })
     }
 
@@ -130,7 +138,7 @@ function Profile(props) {
       }, {
         "content-type": "application/json"
       }).then(res => {
-        getInfo(userID, setUserInfo, setUserWeight, setUserGoal, setRight, saveInfo)
+        getInfo(userID, setUserInfo, setUserWeight, setUserGoal, setRight, saveInfo, setProfilePictureDisplay)
       })
     }
 
@@ -141,7 +149,7 @@ function Profile(props) {
       }, {
         "content-type": "application/json"
       }).then(res => {
-        getInfo(userID, setUserInfo, setUserWeight, setUserGoal, setRight, saveInfo)
+        getInfo(userID, setUserInfo, setUserWeight, setUserGoal, setRight, saveInfo, setProfilePictureDisplay)
       })
     }
   }
@@ -160,7 +168,7 @@ function Profile(props) {
         <div className="profile-info-wrapper">
           <div className="profile-info-left">
             <div className="profile-picture-wrapper">
-              <img className="profile-picture" src={DefaultProfile} alt="Profile"/>
+              <img className="profile-picture" src={profilePictureDisplay} key={profilePictureDisplay} alt="Profile"/>
             </div>
             {userInfo.name}
             <div className="profile-info-container">
