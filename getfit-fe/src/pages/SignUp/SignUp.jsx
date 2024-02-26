@@ -69,7 +69,10 @@ function SignUp(props) {
       return false
     }
 
-    const nameSplit = name.split(' ')
+    // Get rid of space at end if it is there
+    let newName = name.trim() 
+
+    const nameSplit = newName.split(' ')
     for (let i = 0; i < nameSplit.length; i++) {
       nameSplit[i] = nameSplit[i][0].toUpperCase() + nameSplit[i].substr(1)
     }

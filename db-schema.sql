@@ -32,7 +32,7 @@ CREATE TABLE Exercises (
     userID VARCHAR(100),
     exerciseID VARCHAR(100),
     name VARCHAR(100),
-    picture BIT(10000),
+    picture VARCHAR(500),
     category VARCHAR(100),
     PRIMARY KEY(exerciseID),
     FOREIGN KEY(userID) REFERENCES Users ON DELETE CASCADE

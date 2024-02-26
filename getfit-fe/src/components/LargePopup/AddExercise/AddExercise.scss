@@ -1,2 +1,109 @@
 @import './../../../global.scss';
 
+.add-exercise-wrapper {
+  box-sizing: border-box;
+  padding: 15px;
+}
+
+.add-exercise-top-row {
+  display: flex;
+  align-items: flex-end;
+}
+
+.add-exercise-img-container {
+  height: 100px;
+  width: 100px;
+  border: 5px solid lightgray;
+  border-radius: 70px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.add-exercise-img-overlay {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  background: rgba($color: rgb(142, 141, 141), $alpha: 0.7);
+}
+
+.add-exercise-img {
+  height: 100%;
+}
+
+.add-exercise-img-icon {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 25px;
+
+  input[type='file'] {
+    display: none;
+  }
+
+  i {
+    transition: ease 0.2s all;
+    
+    &:hover {
+      cursor: pointer;
+      font-size: 27px;
+    }
+  }
+}
+
+.add-exercise-file-upload {
+
+}
+
+.add-exercise-name-input {
+  height: 60px;
+  width: calc(100% - 110px);
+  margin-left: 10px;
+}
+
+.add-exercise-bottom-row {
+  height: 60px;
+  width: 100%;
+  margin-top: 15px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.add-exercise-bottom-input {
+  height: 100%;
+  width: 30%;
+}
+
+.add-exercise-btns-container {
+  height: 40px;
+  width: 100%;
+  margin-top: 15px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.add-exercise-btn {
+  height: 100%;
+  width: 40%;
+}
+
+.add-exercise-message {
+  width: 100%;
+  text-align: center;
+  margin-top: 20px;
+  font-weight: 500;
+
+  &.error {
+    color: red;
+  }
+
+  &.saving {
+    color: green;
+  }
+}

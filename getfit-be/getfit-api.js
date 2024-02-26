@@ -353,15 +353,15 @@ app.post('/users/update-goal', async (req, res) => {
 // Add an Exercise TODO: category implementation
 app.post('/exercise/create', async (req, res) => {
   let user = req.body
-  let exerciseID = uuid()
+  // let exerciseID = uuid() 
   let historyID = uuid()
   let changeDate = await getCurrentDate()
 
   client.query('BEGIN', (err, result) => {
     if(err) return rollback(client, res, "Error @: Beginning exercise creation -> "+err.message)
-    client.query(`INSERT INTO Exercises (userID, exerciseID, name) VALUES ('${user.userID}', '${exerciseID}', '${user.name}');`, async(err, result) => {
+    client.query(`INSERT INTO Exercises (userID, exerciseID, name, picture) VALUES ('${user.userID}', '${user.exerciseID}', '${user.name}', '${user.picture}');`, async(err, result) => {
       if(err) return rollback(client, res, "Error @: Inserting new exercise info -> "+err.message)
-      client.query(`INSERT INTO History (exerciseID, historyID, sets, reps, weight, changeDate) VALUES ('${exerciseID}', '${historyID}', ${user.sets}, ${user.reps}, ${user.weight}, '${changeDate}');`, async (err, result) => {
+      client.query(`INSERT INTO History (exerciseID, historyID, sets, reps, weight, changeDate) VALUES ('${user.exerciseID}', '${historyID}', ${user.sets}, ${user.reps}, ${user.weight}, '${changeDate}');`, async (err, result) => {
         if(!err) { 
           logging(res, '', "Exercise created successfully", true)
           client.query('COMMIT')
@@ -378,7 +378,7 @@ app.post('/exercise/create', async (req, res) => {
 app.put('/exercise/update-info', async (req, res) => {
   let user = req.body
 
-  client.query(`UPDATE Exercises SET name = '${user.name}' WHERE exerciseID = '${user.exerciseID}';`, async (err, result) => {
+  client.query(`UPDATE Exercises SET name = '${user.name}', picture = '${user.picture}' WHERE exerciseID = '${user.exerciseID}';`, async (err, result) => {
     if (!err) {
       logging(res, '', "Exercise info updated ", true)
     } else {
@@ -422,9 +422,9 @@ app.get('/exercise/get-all', async (req, res) => {
     (SELECT * FROM (SELECT * FROM Exercises WHERE userID = '${req.query.userID}') AS Temp1 JOIN History USING(exerciseID)) AS Temp2) 
     SELECT * FROM RecentHistory WHERE RowNum = 1;`, async (err, result) => {
     if (!err) {
-      logging(res, 'User '+req.query.userID+' exercises retrieved successfully', true)
+      logging(res, result.rows, 'User '+req.query.userID+' exercises retrieved successfully', true)
     } else {
-      logging(res, "Error @: Getting exercises of user -> "+err.message, false)
+      logging(res, '', "Error @: Getting exercises of user -> "+err.message, false)
     } 
   })
   client.end

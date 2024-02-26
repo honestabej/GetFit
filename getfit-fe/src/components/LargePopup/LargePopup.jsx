@@ -5,16 +5,16 @@ import AddWorkout from './AddWorkout/AddWorkout'
 import EditExercise from './EditExercise/EditExercise'
 import EditProfile from './EditProfile/EditProfile'
  
-const LargePopup = (prop) => {
+const LargePopup = (props) => {
   var popup = <div>An error has occurred</div>
 
-  if (prop.popup === "AddExercise") {
-    popup = <AddExercise/>
-  } else if (prop.popup === "AddWorkout") {
+  if (props.popup === "AddExercise") {
+    popup = <AddExercise setIsAddExercise={props.setIsAddExercise} addExercise={props.addExercise} />
+  } else if (props.popup === "AddWorkout") {
     popup = <AddWorkout/>
-  } else if (prop.popup === "EditExercise") {
+  } else if (props.popup === "EditExercise") {
     popup = <EditExercise/>
-  } else if (prop.popup === "EditProfile") {
+  } else if (props.popup === "EditProfile") {
     popup = <EditProfile/>
   }
 

@@ -9,6 +9,7 @@ import WorkouButton from '../../components/Buttons/WorkoutButton/WorkoutButton'
 import Exercises from '../../components/Profile/Exercises/Exercises'
 import Stats from '../../components/Profile/Stats/Stats'
 import Info from '../../components/Profile/Info/Info'
+import LargePopup from './../../components/LargePopup/LargePopup'
 
 // Get the newly saved info from the database
 async function getInfo(userID, setUserInfo, setUserWeight, setUserGoal, setRight, saveInfo, setProfilePictureDisplay, isNewProfilePicture) {
@@ -38,6 +39,7 @@ async function getInfo(userID, setUserInfo, setUserWeight, setUserGoal, setRight
 }
 
 function Profile(props) {
+  const [exercises, setExercises] = useState([])
   const [userInfo, setUserInfo] = useState({})
   const [userWeight, setUserWeight] = useState({})
   const [userGoal, setUserGoal] = useState({})
@@ -47,7 +49,8 @@ function Profile(props) {
   const [activeButton, setActiveButton] = useState(['active', '', '', ''])
   const [width, setWidth] = useState(undefined)
   const [arrowIcon, setArrowIcon] = useState(<></>)
-  const [right, setRight] = useState(<Exercises />)
+  const [right, setRight] = useState()
+  const [isAddExercise, setIsAddExercise] = useState(false)
 
   useEffect(() => {
     // Check for current session
@@ -68,6 +71,12 @@ function Profile(props) {
 
         axios.get("http://localhost:3001/users/goal?userID="+res.data.user).then(res => { 
           setUserGoal(res.data[0])
+        })
+
+        axios.get("http://localhost:3001/exercise/get-all?userID="+res.data.user).then(res => {
+          setExercises(res.data)
+          setRight(<Exercises exercises={res.data} userid={res.data.user} setIsAddExercise={setIsAddExercise} />)
+          // TODO handle category stuff
         })
       } else {
         window.location.href = '/' // TODO: change to error page when created
@@ -103,7 +112,7 @@ function Profile(props) {
     setActiveButton(arr)
 
     if (btn === 0) {
-      setRight(<Exercises />)
+      setRight(<Exercises exercises={exercises} userid={userID} setIsAddExercise={setIsAddExercise} from={''}/>)
     } else if (btn === 1) {
       setRight(<Stats />)
     } else if (btn === 2) {
@@ -115,8 +124,6 @@ function Profile(props) {
 
   // Save new info to the database
   const saveInfo = (name, email, age, profilePicture, isNewProfilePicture, weight, goal) => {
-    
-
     if (name !== userInfo.name || email !== userInfo.email || age !== userInfo.age || profilePicture !== userInfo.profilepicture || isNewProfilePicture) {
       axios.put("http://localhost:3001/users/update-user-info", {
         "userID": userID, 
@@ -154,6 +161,28 @@ function Profile(props) {
     }
   }
 
+  // Add new exercise into the database
+  const addExercise = (exerciseID, name, picture, weight, sets, reps) => {
+    axios.post("http://localhost:3001/exercise/create", {
+      "userID": userID,
+      "exerciseID": exerciseID,
+      "name": name,
+      "picture": picture,
+      "weight": weight, 
+      "sets": sets,
+      "reps": reps
+    }, {
+      "content-type": "application/json"
+    }).then( res => {
+      axios.get("http://localhost:3001/exercise/get-all?userID="+userID).then(res => {
+        setExercises(res.data)
+        setRight(<Exercises exercises={res.data} setIsAddExercise={setIsAddExercise} from={"here"} />)
+        // TODO handle category stuff
+      })
+    })
+  }
+
+  // Sign the user out and destroy the session
   const signOut = () => {
     axios.get("http://localhost:3001/users/logout").then(res => {
       console.log("You have been logged out")
@@ -164,6 +193,7 @@ function Profile(props) {
   return (
     <div className='profile-wrapper'>
       <Header loggedIn={loggedIn} white={false} />
+      {isAddExercise ? <LargePopup popup={'AddExercise'} setIsAddExercise={setIsAddExercise} addExercise={addExercise} /> : <></>}
       <div className="profile-container">
         <div className="profile-info-wrapper">
           <div className="profile-info-left">
