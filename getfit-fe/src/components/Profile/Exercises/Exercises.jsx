@@ -19,15 +19,35 @@ function Exercises(props) {
   }, [setExercises])
 
   // Add an exercise
-  const saveExercise = (name, picture, weight, sets, reps) => {
-    console.log(name)
-    setIsAddingExercise(false)
+  const saveExercise = (exerciseID, name, picture, weight, sets, reps) => {
+    axios.post("http://localhost:3001/exercise/create", {
+      "userID": props.userid,
+      "exerciseID": exerciseID,
+      "name": name,
+      "picture": picture,
+      "weight": weight,
+      "reps": reps, 
+      "sets": sets
+    }, {
+      "content-type": "application/json"
+    }).then(() => {
+      axios.get("http://localhost:3001/exercise/get-all?userID="+props.userid).then(res => {
+      console.log("Exercises retrieved")
+      setExercises(res.data)
+      setIsAddingExercise(false)
+    })
+    })
   }
 
   // Edit an exercise
+  const editExercise = (name, picture, weight, sets, reps) => {
+    console.log(name)
+    setIsEditingExercise(false)
+  }
 
   // Delete and exercise
   const deleteExercise = (exerciseID) => {
+    // TODO: Delete image from firebase
     axios.delete("http://localhost:3001/exercise/delete?exerciseID="+exerciseID).then ( res => {
       axios.get("http://localhost:3001/exercise/get-all?userID="+props.userid).then(res => {
         setExercises(res.data)
@@ -39,7 +59,7 @@ function Exercises(props) {
 
   return (
     <div className="exercises-wrapper">
-      {isEditingExercise ? <LargePopup popup={'EditExercise'} /> : <></> }
+      {isEditingExercise ? <LargePopup popup={'EditExercise'} setIsEditingExercise={setIsEditingExercise} editExercise={editExercise} /> : <></> }
       {isAddingExercise ? <LargePopup popup={'AddExercise'} setIsAddingExercise={setIsAddingExercise} saveExercise={saveExercise} /> : <></>}
       {exercises ? 
         exercises.map(exercise => {
@@ -47,7 +67,7 @@ function Exercises(props) {
             <div key={exercise.exerciseid} >
               Name: {exercise.name} 
               <button onClick={() => setIsEditingExercise(true)}>Edit</button>
-              <button>Delete</button>
+              <button onClick={() => deleteExercise(exercise.exerciseid)} >Delete</button>
             </div>
           )
         })

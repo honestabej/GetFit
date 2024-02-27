@@ -1,5 +1,8 @@
 import './AddExercise.scss'
 import React, { useState } from 'react'
+import { v4 } from 'uuid'
+import { storage } from '../../../Firebase'
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import LabelInput from '../../Inputs/LineInput/LabelInput'
 import DefaultPicture from './.././../../images/Default_Exercise.png'
 import ButtonFill from '../../Buttons/ButtonFill/ButtonFill'
@@ -12,7 +15,8 @@ const AddExercise = (props) => {
   const [sets, setSets] = useState()
   const [reps, setReps] = useState()
   const [file, setFile] = useState(null)
-
+  const [errorMessage, setErrorMessage] = useState('')
+  const [saveMessage, setSaveMessage] = useState('')
 
   const nameChange = (e) => {
     setName(e.target.value)
@@ -35,12 +39,76 @@ const AddExercise = (props) => {
     setReps(Number(e.target.value))
   }
 
-  const saveExercise = (name, picture, weight, sets, reps) => {
-    props.saveExercise(name, picture, weight, sets, reps)
+  const saveExercise = (name, weight, sets, reps) => {
+    let isValidAndName = validateFormatInputs(name, weight, sets, reps)
+
+    // Ensure inputs are correctly formatted
+    if (isValidAndName[0]) {
+      setSaveMessage('Saving...')
+      var exerciseID = v4()
+      var pictureUrl = 'https://firebasestorage.googleapis.com/v0/b/getfit-5d057.appspot.com/o/exercisePictures%2FDefault_Exercise.png?alt=media&token=3d89bc09-dfa0-4c5b-871f-a1a254e44ca7'
+      // If file was changed, upload selected phot to firebase and get the url before posting to DB
+      if (file !== null) {
+        const imageRef = ref(storage, `exercisePictures/${exerciseID}`)
+        uploadBytes(imageRef, file).then((snapshot) => {
+          getDownloadURL(snapshot.ref).then((url) => {
+            pictureUrl = url
+          }).then(() => {
+            // Save the new userInfo after the image has uploaded and url has been retrieved
+            props.saveExercise(exerciseID, name, pictureUrl, weight, sets, reps)
+          })
+        })
+      } else {
+        // Save the new userInfo after the image has uploaded
+        props.saveExercise(exerciseID, name, pictureUrl, weight, sets, reps)
+      }
+    }
   }
 
   const validateFormatInputs = (name, weight, sets, reps) => {
+    // Reset error message
+    setErrorMessage('')
 
+    if (name === undefined || weight === undefined || sets === undefined || reps === undefined) {
+      setErrorMessage('Please fill out all fields')
+      return false
+    }
+
+    // Validate that name isnt too long, and then capitalize it properly
+    if (name.length > 50) {
+      setErrorMessage('Name is too long')
+      return false
+    }
+
+    // Get rid of space at end if it is there
+    let newName = name.trim() 
+    const nameSplit = newName.split(' ')
+    for (let i = 0; i < nameSplit.length; i++) {
+      nameSplit[i] = nameSplit[i][0].toUpperCase() + nameSplit[i].substr(1)
+      console.log(nameSplit[i])
+    }
+    name = nameSplit.join(' ')
+
+    // Validate that weight contains only numbers
+    var isNumber = /^\d+$/
+    if (!isNumber.test(weight)) {
+      setErrorMessage('Invalid weight')
+      return false
+    }
+
+    // Verify that sets contains only numbers
+    if (!isNumber.test(sets)) {
+      setErrorMessage('Invalid sets')
+      return false
+    }
+
+    // Verify that reps contains only numbers
+    if (!isNumber.test(reps)) {
+      setErrorMessage('Invalid reps')
+      return false
+    }
+
+    return [true, name]
   }
 
   return (
@@ -76,15 +144,15 @@ const AddExercise = (props) => {
           <ButtonNoFill value={'Cancel'} onClick={() => props.setIsAddingExercise(false)} color={'red'} />
         </div>
         <div className="add-exercise-btn">
-          <ButtonFill value={'Save'} onClick={() => saveExercise(name, 0, 0, 0, 0)} />
+          <ButtonFill value={'Save'} onClick={() => saveExercise(name, weight, sets, reps)} />
         </div>
       </div>
-      {/* <div className="add-exercise-message error">
+      <div className="add-exercise-message error">
         {errorMessage}
       </div>
       <div className="add-exercise-message saving">
-        {savingMessage}
-      </div> */}
+        {saveMessage}
+      </div>
     </div>
   )
 }
