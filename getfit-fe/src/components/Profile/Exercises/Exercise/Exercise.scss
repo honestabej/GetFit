@@ -1,5 +1,101 @@
-@import './../../../global.scss';
+@import './../../../../global.scss';
 
 .exercise-wrapper {
-  
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 4px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    padding: 2px;
+    cursor: pointer;
+  }
+}
+
+.exercise-container {
+  height: 100%;
+  width: 100%;
+  background-color: white;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 10px;
+}
+
+.exercise-img-container {
+  height: 90px;
+  width: 90px;
+  border: 2px solid lightgray;
+  border-radius: 5px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+
+  img {
+    height: 100%;
+  }
+
+  @media screen and (max-width: 400px) {
+    height: 65px;
+    width: 65px;
+  }
+}
+
+.exercise-info-container {
+  height: 100%;
+  width: calc(100% - 100px);
+
+  @media screen and (max-width: 400px) {
+    width: calc(100% - 70px);
+  }
+}
+
+.exercise-name {
+  height: 30px;
+  width: calc(100% - 10px);
+  margin-left: 10px;
+  font-size: 17px;
+  text-align: center;
+  font-weight: 800;
+
+  @media screen and (max-width: 400px) {
+    height: 20px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+}
+
+.exercise-history-container {
+  height: calc(100% - 38px);
+  width: calc(100% - 10px);
+  margin-left: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  @media screen and (max-width: 400px) {
+    height: calc(100% - 28px)
+  }
+}
+
+.exercise-history {
+  width: 32%;
+  text-align: center;
+
+  @media screen and (max-width: 400px) {
+    font-size: 14px;
+  }
+}
+
+.exercise-history-label {
+  margin-top: 5px;
+  font-weight: 800;
+
+  @media screen and (max-width: 400px) {
+    font-weight: 700;
+    margin-top: 2px;
+  }
 }

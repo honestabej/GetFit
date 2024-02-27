@@ -3,6 +3,28 @@
 .edit-exercise-wrapper {
   box-sizing: border-box;
   padding: 15px;
+  position: relative;
+}
+
+.edit-exercise-delete {
+  height: 30px;
+  width: 30px;
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  color: red;
+  box-sizing: border-box;
+  padding: 7px;
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: ease 0.4s all;
+
+  &:hover {
+    cursor: pointer;
+    background-color: rgba(255, 89, 89, 0.3);
+  }
 }
 
 .edit-exercise-top-row {
@@ -13,8 +35,8 @@
 .edit-exercise-img-container {
   height: 100px;
   width: 100px;
-  border: 5px solid lightgray;
-  border-radius: 70px;
+  border: 2px solid lightgray;
+  border-radius: 10px;
   overflow: hidden;
   position: relative;
   display: flex;

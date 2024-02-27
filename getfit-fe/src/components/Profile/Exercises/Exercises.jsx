@@ -5,12 +5,14 @@ import { storage } from './../../../Firebase'
 import { ref, deleteObject } from 'firebase/storage'
 import AddButton from './../../Buttons/AddButton/AddButton'
 import LargePopup from '../../LargePopup/LargePopup'
+import Exercise from './Exercise/Exercise'
 
 function Exercises(props) {
   const [exercises, setExercises] = useState([])
   const [editingPopup, setEditingPopup] = useState(<></>)
   const [isEditingExercise, setIsEditingExercise] = useState(false)
   const [isAddingExercise, setIsAddingExercise] = useState(false)
+  const [currentCategory, setCurrentCategory] = useState('All')
 
   useEffect(() => {
     // Get all of user's exercises
@@ -43,7 +45,7 @@ function Exercises(props) {
 
   // Edit an exercise
   const editExerciseClicked = (exerciseID, name, picture, weight, sets, reps) => {
-    setEditingPopup(<LargePopup popup={'EditExercise'} setIsEditingExercise={setIsEditingExercise} editExercise={editExercise} exerciseid={exerciseID} name={name} picture={picture} weight={weight} sets={sets} reps={reps} />)
+    setEditingPopup(<LargePopup popup={'EditExercise'} setIsEditingExercise={setIsEditingExercise} editExercise={editExercise} deleteExercise={deleteExercise} exerciseid={exerciseID} name={name} picture={picture} weight={weight} sets={sets} reps={reps} />)
     setIsEditingExercise(true)
   }
 
@@ -78,41 +80,46 @@ function Exercises(props) {
         })
       })
     }
-
     setIsEditingExercise(false)
   }
 
-  // Delete and exercise
+  // Delete an exercise
   const deleteExercise = (exerciseID) => {
-    // TODO: Delete image from firebase
     axios.delete("http://localhost:3001/exercise/delete?exerciseID="+exerciseID).then ( res => {
       const imageRef = ref(storage, `exercisePictures/${exerciseID}`)
       deleteObject(imageRef)
       axios.get("http://localhost:3001/exercise/get-all?userID="+props.userid).then(res => {
         setExercises(res.data)
-        // TODO handle category stuff
       })
     })
+    setIsEditingExercise(false)
   }
 
   return (
     <div className="exercises-wrapper">
       {isEditingExercise ? editingPopup : <></> }
       {isAddingExercise ? <LargePopup popup={'AddExercise'} setIsAddingExercise={setIsAddingExercise} saveExercise={saveExercise} /> : <></>}
-      {exercises ? 
-        exercises.map(exercise => {
-          return (
-            <div key={exercise.exerciseid} >
-              Name: {exercise.name} 
-              Weight: {exercise.weight}
-              <button onClick={() => editExerciseClicked(exercise.exerciseid, exercise.name, exercise.picture, exercise.weight, exercise.sets, exercise.reps)}>Edit</button>
-              <button onClick={() => deleteExercise(exercise.exerciseid)} >Delete</button>
-            </div>
-          )
-        })
-      :
-        <>Loading...</>
-      }
+      <div className="exercises-top-container">
+        <div className="categories-container">
+          Category: <span>{currentCategory} <i class="fa-solid fa-angle-down"></i></span>
+        </div>
+        <div className="sort-container">
+          Sort <i class="fa-solid fa-sort"></i>
+        </div>
+      </div>
+      <div className="exercises-container">
+        {exercises ? 
+          exercises.map(exercise => {
+            return (
+              <div className="exercise" key={exercise.exerciseid} onClick={() => editExerciseClicked(exercise.exerciseid, exercise.name, exercise.picture, exercise.weight, exercise.sets, exercise.reps)}>
+                <Exercise exerciseid={exercise.exerciseid} name={exercise.name} picture={exercise.picture} weight={exercise.weight} sets={exercise.sets} reps={exercise.reps} />
+              </div>
+            )
+          })
+        :
+          <>Loading...</>
+        }
+      </div>
       <AddButton onClick={() => setIsAddingExercise(true)} />
     </div>
   )

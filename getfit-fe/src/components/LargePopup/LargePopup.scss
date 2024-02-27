@@ -11,13 +11,18 @@
   display: flex;
   justify-content: center;
   align-items: center;
+
+  @media screen and (max-width:440px) {
+    box-sizing: border-box;
+    padding: 0px 15px;
+  }
 }
 
 .large-popup-container {
   height: auto;
   width: 400px;
+  min-width: 350px;
   background-color: #efefef;
   background-image: $lightBackgroundImage;
-  padding: 10px;
   border-radius: 5px;
 }

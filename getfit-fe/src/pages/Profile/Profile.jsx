@@ -8,7 +8,6 @@ import WorkouButton from '../../components/Buttons/WorkoutButton/WorkoutButton'
 import Exercises from '../../components/Profile/Exercises/Exercises'
 import Stats from '../../components/Profile/Stats/Stats'
 import Info from '../../components/Profile/Info/Info'
-import LargePopup from './../../components/LargePopup/LargePopup'
 
 function Profile(props) {
   const userID = useRef()
@@ -80,7 +79,7 @@ function Profile(props) {
     setActiveButton(arr)
 
     if (btn === 0) {
-      setRight(<Exercises />)
+      setRight(<Exercises userid={userID.current} />)
     } else if (btn === 1) {
       setRight(<Stats />)
     } else if (btn === 2) {

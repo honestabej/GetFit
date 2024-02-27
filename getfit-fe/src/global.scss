@@ -51,7 +51,7 @@ $minWidth: 350px;
 }
 
 .vertical-line-two {
-  height: 100%;
+  height: calc(100vh - $headerHeight - 20px);
   width: 1px;
   background-color: lightgray;
 }

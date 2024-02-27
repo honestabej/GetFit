@@ -13,7 +13,7 @@ const LargePopup = (props) => {
   } else if (props.popup === "AddWorkout") {
     popup = <AddWorkout/>
   } else if (props.popup === "EditExercise") {
-    popup = <EditExercise popup={'EditExercise'} setIsEditingExercise={props.setIsEditingExercise} editExercise={props.editExercise} exerciseid={props.exerciseid} name={props.name} picture={props.picture} weight={props.weight} sets={props.sets} reps={props.reps} />
+    popup = <EditExercise popup={'EditExercise'} setIsEditingExercise={props.setIsEditingExercise} editExercise={props.editExercise} deleteExercise={props.deleteExercise} exerciseid={props.exerciseid} name={props.name} picture={props.picture} weight={props.weight} sets={props.sets} reps={props.reps} />
   } else if (props.popup === "EditProfile") {
     popup = <EditProfile/>
   }

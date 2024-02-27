@@ -3,7 +3,6 @@ import React, { useState } from 'react'
 import { storage } from './../../../Firebase'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import LabelInput from '../../Inputs/LineInput/LabelInput'
-import DefaultPicture from './.././../../images/Default_Exercise.png'
 import ButtonFill from '../../Buttons/ButtonFill/ButtonFill'
 import ButtonNoFill from '../../Buttons/ButtonNoFill/ButtonNoFill'
 
@@ -130,6 +129,7 @@ const EditExercise = (props) => {
 
   return (
     <div className="edit-exercise-wrapper">
+      <div className="edit-exercise-delete" onClick={() => props.deleteExercise(props.exerciseid)} ><i class="fa-solid fa-trash"></i></div>
       <div className="edit-exercise-top-row">
         <div className="edit-exercise-img-container">
           <div className="edit-exercise-img-overlay"></div>

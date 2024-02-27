@@ -138,20 +138,21 @@ function Info(props) {
     // Ensure inputs are correctly formatted
     if (isValidAndName[0]) {
       setSaveMessage('Saving...')
+      var pictureUrl = props.profilepicture
       // If file was changed, upload selected phot to firebase and get the url before posting to DB
       if (file !== null) {
         const imageRef = ref(storage, `profilePictures/${props.userid}`)
         uploadBytes(imageRef, file).then((snapshot) => {
           getDownloadURL(snapshot.ref).then((url) => {
-            setProfilePicture(url)
+            pictureUrl = url
           }).then(() => {
             // Save the new userInfo after the image has uploaded and url has been retrieved
-            postInfoToDB(props.userid, props.name, isValidAndName[1], props.email, email, props.age, age, props.profilepicture, profilePicture, props.weight, weight, props.goal, goal, props.setuserinfo, props.setuserweight, props.setusergoal, props.setright, setSaveMessage, setFile)
+            postInfoToDB(props.userid, props.name, isValidAndName[1], props.email, email, props.age, age, props.profilepicture, pictureUrl, props.weight, weight, props.goal, goal, props.setuserinfo, props.setuserweight, props.setusergoal, props.setright, setSaveMessage, setFile)
           })
         })
       } else {
         // Save the new userInfo after the image has uploaded
-        postInfoToDB(props.userid, props.name, isValidAndName[1], props.email, email, props.age, age, props.profilepicture, profilePicture, props.weight, weight, props.goal, goal, props.setuserinfo, props.setuserweight, props.setusergoal, props.setright, setSaveMessage, setFile)
+        postInfoToDB(props.userid, props.name, isValidAndName[1], props.email, email, props.age, age, props.profilepicture, pictureUrl, props.weight, weight, props.goal, goal, props.setuserinfo, props.setuserweight, props.setusergoal, props.setright, setSaveMessage, setFile)
       }
     }
   }
