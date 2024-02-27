@@ -8,107 +8,124 @@ import ButtonFill from '../../Buttons/ButtonFill/ButtonFill'
 import ButtonNoFill from '../../Buttons/ButtonNoFill/ButtonNoFill'
 
 const EditExercise = (props) => {
-  const [exercisePictureDisplay, setExercisePictureDisplay] = useState(props.picture)
-  const [name, setName] = useState()
+  const [name, setName] = useState(props.name)
+  const [picture, setPicture] = useState(props.picture)
+  const [weight, setWeight] = useState(props.weight)
+  const [sets, setSets] = useState(props.sets)
+  const [reps, setReps] = useState(props.reps)
   const [file, setFile] = useState(null)
-  const [weight, setWeight] = useState()
-  const [sets, setSets] = useState()
-  const [reps, setReps] = useState()
   const [errorMessage, setErrorMessage] = useState('')
   const [savingMessage, setSavingMessage] = useState('')
-  let exercisePicture
 
   const nameChange = (e) => {
-    setName(e.target.value)
+    if (e.target.value === '') {
+      setName(props.name)
+    } else {
+      setName(e.target.value)
+    }
   }
 
   const exercisePictureChange = (e) => {
     setFile(e.target.files[0])
-    setExercisePictureDisplay(URL.createObjectURL(e.target.files[0]))
+    setPicture(URL.createObjectURL(e.target.files[0]))
   }
 
   const weightChange = (e) => {
-    setWeight(Number(e.target.value))
+    if (e.target.value === '') {
+      setWeight(props.weight)
+    } else {
+      setWeight(Number(e.target.value))
+    }
   }
 
   const setsChange = (e) => {
-    setSets(Number(e.target.value))
+    if (e.target.value === '') {
+      setSets(props.sets)
+    } else {
+      setSets(Number(e.target.value)) 
+    }
   }
 
   const repsChange = (e) => {
-    setReps(Number(e.target.value))
+    if (e.target.value === '') {
+      setReps(props.reps)
+    } else {
+      setReps(Number(e.target.value))
+    }
   }
 
-  const editExercise = () => {
-    let isValid = verifyInputs(name, weight, sets, reps)
+  const editExercise = (exerciseID, name, picture, weight, sets, reps) => {
+    let isValidAndName = validateFormatInputs(name, picture, weight, sets, reps)
 
-    if (isValid) {
+    if (isValidAndName.isValid) {
       setSavingMessage('Saving...')
 
       if (file !== null) {
         // Upload exercise image to DB
-        const imageRef = ref(storage, `exercisePictures/${props.exerciseid}`)
+        const imageRef = ref(storage, `exercisePictures/${exerciseID}`)
         uploadBytes(imageRef, file).then((snapshot) => {
           getDownloadURL(snapshot.ref).then((url) => {
-            exercisePicture = url
+            picture = url
           }).then(() => {
-            props.editExercise(props.exerciseid, name, exercisePicture, true, weight, sets, reps)
-            props.setIsEditExercise(false)
+            props.editExercise(exerciseID, isValidAndName.name, picture, weight, sets, reps, isValidAndName.isExerciseInfoChanged, isValidAndName.isExerciseHistoryChanged)
           })
         })
       } else {
-        props.editExercise(props.exerciseid, name, props.picture, false, weight, sets, reps)
-        props.setIsEditExercise(false)
+        props.editExercise(exerciseID, isValidAndName.name, picture, weight, sets, reps, isValidAndName.isExerciseInfoChanged, isValidAndName.isExerciseHistoryChanged)
       }
     }
   }
 
-  const verifyInputs = (name, weight, sets, reps) => {
+  const validateFormatInputs = (name, picture, weight, sets, reps) => {
     setErrorMessage('')
+    let isExerciseInfoChanged = false
+    let isExerciseHistoryChanged = false
     
     // Verfiy the name is less than 30 characters, and is capitalized properly
-    if(name !== undefined) {
-      if (name.length > 30) {
-        setErrorMessage('Exercise name is too long')
-        return false
-      }
-
-      // Get rid of space at end if it is there
-      let newName = name.trim() 
-
-      const nameSplit = newName.split(' ')
-      for (let i = 0; i < nameSplit.length; i++) {
-        nameSplit[i] = nameSplit[i][0].toUpperCase() + nameSplit[i].substr(1)
-      }
-      name = nameSplit.join(' ')
+    if (name.length > 30) {
+      setErrorMessage('Exercise name is too long')
+      return {'isValid': false}
     }
+
+    // Get rid of space at end if it is there
+    let newName = name.trim() 
+    const nameSplit = newName.split(' ')
+    for (let i = 0; i < nameSplit.length; i++) {
+      nameSplit[i] = nameSplit[i][0].toUpperCase() + nameSplit[i].substr(1)
+    }
+    name = nameSplit.join(' ')
+    
 
     // Verify that the weight is a number
     var isNumber = /^\d+$/
-    if (weight !== undefined) {
-      if (!isNumber.test(weight)) {
-        setErrorMessage('Invalid weight')
-        return false
-      }
+    if (!isNumber.test(weight)) {
+      setErrorMessage('Invalid weight')
+      return {'isValid': false}
     }
 
     // Verify that the sets are a number
-    if (sets !== undefined) {
-      if (!isNumber.test(sets)) {
-        setErrorMessage('Invalid sets')
-        return false
-      }
+    if (!isNumber.test(sets)) {
+      setErrorMessage('Invalid sets')
+      return {'isValid': false}
     }
 
     // Verify that the reps are a number
-    if (reps !== undefined) {
-      if (!isNumber.test(reps)) {
-        setErrorMessage('Invalid reps')
-        return false
-      }
+    if (!isNumber.test(reps)) {
+      setErrorMessage('Invalid reps')
+      return {'isValid': false}
     }
 
-    return true
+    // Check if exercise info has changed
+    if (name !== props.name || picture !== props.picture) {
+      isExerciseInfoChanged = true
+    }
+
+    // Check if exercise history has changed
+    if (weight !== props.weight || sets !== props.sets || reps !== props.reps) {
+      isExerciseHistoryChanged = true
+    }
+
+    return {isValid: true, 'name': name, 'isExerciseInfoChanged': isExerciseInfoChanged, 'isExerciseHistoryChanged': isExerciseHistoryChanged}
   }
 
   return (
@@ -116,7 +133,7 @@ const EditExercise = (props) => {
       <div className="edit-exercise-top-row">
         <div className="edit-exercise-img-container">
           <div className="edit-exercise-img-overlay"></div>
-          <img className="edit-exercise-img" src={exercisePictureDisplay} alt='Profile' />
+          <img className="edit-exercise-img" src={picture} alt='Profile' />
           <div className="edit-exercise-img-icon">
             <label htmlFor="file-upload" className="edit-exercise-file-upload">
               <i className="fa-solid fa-pen-to-square"></i>
@@ -141,10 +158,10 @@ const EditExercise = (props) => {
       </div>
       <div className="edit-exercise-btns-container">
         <div className="edit-exercise-btn">
-          <ButtonNoFill value={'Cancel'} onClick={() => props.setIsEditExercise(false)} color={'red'} />
+          <ButtonNoFill value={'Cancel'} onClick={() => props.setIsEditingExercise(false)} color={'red'} />
         </div>
         <div className="edit-exercise-btn">
-          <ButtonFill value={'Save'} onClick={editExercise} />
+          <ButtonFill value={'Save'} onClick={() => editExercise(props.exerciseid, name, picture, weight, sets, reps)} />
         </div>
       </div>
       <div className="edit-exercise-message error">

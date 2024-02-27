@@ -91,10 +91,6 @@ function Profile(props) {
     }
   }
 
-  const reRender = () => {
-
-  }
-
   // Sign the user out and destroy the session
   const signOut = () => {
     axios.get("http://localhost:3001/users/logout").then(res => {

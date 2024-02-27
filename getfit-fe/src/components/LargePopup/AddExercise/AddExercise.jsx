@@ -69,44 +69,48 @@ const AddExercise = (props) => {
     // Reset error message
     setErrorMessage('')
 
-    if (name === undefined || weight === undefined || sets === undefined || reps === undefined) {
-      setErrorMessage('Please fill out all fields')
-      return false
-    }
-
     // Validate that name isnt too long, and then capitalize it properly
-    if (name.length > 50) {
-      setErrorMessage('Name is too long')
-      return false
+    if(name !== undefined) {
+      if (name.length > 50) {
+        setErrorMessage('Name is too long')
+        return false
+      }   
+
+      // Get rid of space at end if it is there
+      let newName = name.trim() 
+      const nameSplit = newName.split(' ')
+      for (let i = 0; i < nameSplit.length; i++) {
+        nameSplit[i] = nameSplit[i][0].toUpperCase() + nameSplit[i].substr(1)
+        console.log(nameSplit[i])
+      }
+      name = nameSplit.join(' ')
     }
 
-    // Get rid of space at end if it is there
-    let newName = name.trim() 
-    const nameSplit = newName.split(' ')
-    for (let i = 0; i < nameSplit.length; i++) {
-      nameSplit[i] = nameSplit[i][0].toUpperCase() + nameSplit[i].substr(1)
-      console.log(nameSplit[i])
-    }
-    name = nameSplit.join(' ')
+    var isNumber = /^\d+$/
 
     // Validate that weight contains only numbers
-    var isNumber = /^\d+$/
-    if (!isNumber.test(weight)) {
-      setErrorMessage('Invalid weight')
-      return false
+    if (weight !== undefined) {
+      if (!isNumber.test(weight)) {
+        setErrorMessage('Invalid weight')
+        return false
+      }
     }
 
     // Verify that sets contains only numbers
-    if (!isNumber.test(sets)) {
-      setErrorMessage('Invalid sets')
-      return false
+    if (sets !== undefined) {
+      if (!isNumber.test(sets)) {
+        setErrorMessage('Invalid sets')
+        return false
+      }
     }
 
     // Verify that reps contains only numbers
-    if (!isNumber.test(reps)) {
-      setErrorMessage('Invalid reps')
-      return false
-    }
+    if (reps !== undefined) {
+      if (!isNumber.test(reps)) {
+        setErrorMessage('Invalid reps')
+        return false
+      }
+    }    
 
     return [true, name]
   }
