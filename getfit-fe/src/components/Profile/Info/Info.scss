@@ -96,7 +96,14 @@
   margin-top: 20px;
 }
 
-.info-error-message-container {
+.info-message-container {
   margin-top: 20px;
-  color: red;
+
+  &.error {
+    color: red;
+  }
+  
+  &.save {
+    color:green;
+  }
 }

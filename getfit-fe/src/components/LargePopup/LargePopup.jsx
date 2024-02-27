@@ -9,11 +9,11 @@ const LargePopup = (props) => {
   var popup = <div>An error has occurred</div>
 
   if (props.popup === "AddExercise") {
-    popup = <AddExercise setIsAddExercise={props.setIsAddExercise} addExercise={props.addExercise} />
+    popup = <AddExercise setIsAddingExercise={props.setIsAddingExercise} saveExercise={props.saveExercise} />
   } else if (props.popup === "AddWorkout") {
     popup = <AddWorkout/>
   } else if (props.popup === "EditExercise") {
-    popup = <EditExercise/>
+    popup = <EditExercise />
   } else if (props.popup === "EditProfile") {
     popup = <EditProfile/>
   }

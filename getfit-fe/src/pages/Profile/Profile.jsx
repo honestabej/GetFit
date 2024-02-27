@@ -1,68 +1,37 @@
 import './Profile.scss'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
 import Header from '../../components/Header/Header'
 import ProfileInfo from '../../components/ProfileInfo/ProfileInfo'
 import ProfileButton from '../../components/Buttons/ProfileButton/ProfileButton'
 import WorkouButton from '../../components/Buttons/WorkoutButton/WorkoutButton'
-// import DefaultProfile from '../../images/Default_Profile.jpg'
 import Exercises from '../../components/Profile/Exercises/Exercises'
 import Stats from '../../components/Profile/Stats/Stats'
 import Info from '../../components/Profile/Info/Info'
 import LargePopup from './../../components/LargePopup/LargePopup'
 
-// Get the newly saved info from the database
-async function getInfo(userID, setUserInfo, setUserWeight, setUserGoal, setRight, saveInfo, setProfilePictureDisplay, isNewProfilePicture) {
-  let info = {name: '', email: '', age: 0, profilepicture: '', weight: 0, goal: 0}
-  if (isNewProfilePicture) setProfilePictureDisplay('')
-
-  await axios.get("http://localhost:3001/users?userID="+userID).then(res => {
-    setUserInfo(res.data[0])
-    info.name = res.data[0].name
-    info.email = res.data[0].email
-    info.age = res.data[0].age
-    info.profilepicture = res.data[0].profilepicture
-    setProfilePictureDisplay(res.data[0].profilepicture)
-  })
-
-  await axios.get("http://localhost:3001/users/weight?userID="+userID).then(res => {
-    setUserWeight(res.data[0])
-    info.weight = res.data[0].weight
-  }) 
-
-  await axios.get("http://localhost:3001/users/goal?userID="+userID).then(res => {
-    setUserGoal(res.data[0])
-    info.goal = res.data[0].goal
-  }) 
-
-  setRight(<Info userid={userID} name={info.name} email={info.email} age={info.age} profilePicture={info.profilepicture} weight={info.weight} goal={info.goal} saveInfo={saveInfo} />)
-}
-
 function Profile(props) {
-  const [exercises, setExercises] = useState([])
+  const userID = useRef()
   const [userInfo, setUserInfo] = useState({})
   const [userWeight, setUserWeight] = useState({})
   const [userGoal, setUserGoal] = useState({})
-  const [loggedIn, setLoggedIn] = useState(false)
-  const [userID, setUserID] = useState('')
-  const [profilePictureDisplay, setProfilePictureDisplay] = useState()
+  // const [profilePictureDisplay, setProfilePictureDisplay] = useState()
   const [activeButton, setActiveButton] = useState(['active', '', '', ''])
   const [width, setWidth] = useState(undefined)
   const [arrowIcon, setArrowIcon] = useState(<></>)
-  const [right, setRight] = useState()
-  const [isAddExercise, setIsAddExercise] = useState(false)
+  const [right, setRight] = useState(<></>)
 
   useEffect(() => {
+    console.log("new profile rendered")
     // Check for current session
     axios.get("http://localhost:3001/users/login").then(res => {
-      setLoggedIn(res.data.loggedIn)
-      setUserID(res.data.user)
+      userID.current = res.data.user
+      // console.log(userID.current)
 
       // Get user data if logged in
       if (res.data.loggedIn) {
         axios.get("http://localhost:3001/users?userID="+res.data.user).then(res => {
           setUserInfo(res.data[0])
-          setProfilePictureDisplay(res.data[0].profilepicture)
         })
         
         axios.get("http://localhost:3001/users/weight?userID="+res.data.user).then(res => {
@@ -72,16 +41,15 @@ function Profile(props) {
         axios.get("http://localhost:3001/users/goal?userID="+res.data.user).then(res => { 
           setUserGoal(res.data[0])
         })
-
-        axios.get("http://localhost:3001/exercise/get-all?userID="+res.data.user).then(res => {
-          setExercises(res.data)
-          setRight(<Exercises exercises={res.data} userid={res.data.user} setIsAddExercise={setIsAddExercise} />)
-          // TODO handle category stuff
-        })
       } else {
         window.location.href = '/' // TODO: change to error page when created
       }
+
+      // Default to exercises tab
+      setRight(<Exercises userid={userID.current} />)
     })
+
+    
 
     // Get width of window on load
     setWidth(window.innerWidth)
@@ -112,74 +80,19 @@ function Profile(props) {
     setActiveButton(arr)
 
     if (btn === 0) {
-      setRight(<Exercises exercises={exercises} userid={userID} setIsAddExercise={setIsAddExercise} from={''}/>)
+      setRight(<Exercises />)
     } else if (btn === 1) {
       setRight(<Stats />)
     } else if (btn === 2) {
-      setRight(<Info userid={userID} name={userInfo.name} email={userInfo.email} age={userInfo.age} profilePicture={userInfo.profilepicture} weight={userWeight.weight} goal={userGoal.goal} saveInfo={saveInfo} />)
+      setRight(<Info userid={userID.current} name={userInfo.name} email={userInfo.email} age={userInfo.age} profilepicture={userInfo.profilepicture} 
+        weight={userWeight.weight} goal={userGoal.goal} setuserinfo={setUserInfo} setuserweight={setUserWeight} setusergoal={setUserGoal} setright={setRight} />)
     } else {
       setRight("An Error Has Occurred")
     }
   }
 
-  // Save new info to the database
-  const saveInfo = (name, email, age, profilePicture, isNewProfilePicture, weight, goal) => {
-    if (name !== userInfo.name || email !== userInfo.email || age !== userInfo.age || profilePicture !== userInfo.profilepicture || isNewProfilePicture) {
-      axios.put("http://localhost:3001/users/update-user-info", {
-        "userID": userID, 
-        "name": name,
-        "email": email,
-        "age": age, 
-        "profilePicture": profilePicture
-      }, {
-        "content-type": "application/json"
-      }).then(res => {
-        getInfo(userID, setUserInfo, setUserWeight, setUserGoal, setRight, saveInfo, setProfilePictureDisplay, isNewProfilePicture)
-      })
-    }
+  const reRender = () => {
 
-    if (weight !== userWeight.weight) {
-      axios.post("http://localhost:3001/users/update-weight", {
-        "userID": userID,
-        "weight": weight
-      }, {
-        "content-type": "application/json"
-      }).then(res => {
-        getInfo(userID, setUserInfo, setUserWeight, setUserGoal, setRight, saveInfo, setProfilePictureDisplay)
-      })
-    }
-
-    if (goal !== userGoal.goal) {
-      axios.post("http://localhost:3001/users/update-goal", {
-        "userID": userID,
-        "goal": goal
-      }, {
-        "content-type": "application/json"
-      }).then(res => {
-        getInfo(userID, setUserInfo, setUserWeight, setUserGoal, setRight, saveInfo, setProfilePictureDisplay)
-      })
-    }
-  }
-
-  // Add new exercise into the database
-  const addExercise = (exerciseID, name, picture, weight, sets, reps) => {
-    axios.post("http://localhost:3001/exercise/create", {
-      "userID": userID,
-      "exerciseID": exerciseID,
-      "name": name,
-      "picture": picture,
-      "weight": weight, 
-      "sets": sets,
-      "reps": reps
-    }, {
-      "content-type": "application/json"
-    }).then( res => {
-      axios.get("http://localhost:3001/exercise/get-all?userID="+userID).then(res => {
-        setExercises(res.data)
-        setRight(<Exercises exercises={res.data} setIsAddExercise={setIsAddExercise} from={"here"} />)
-        // TODO handle category stuff
-      })
-    })
   }
 
   // Sign the user out and destroy the session
@@ -192,13 +105,12 @@ function Profile(props) {
 
   return (
     <div className='profile-wrapper'>
-      <Header loggedIn={loggedIn} white={false} />
-      {isAddExercise ? <LargePopup popup={'AddExercise'} setIsAddExercise={setIsAddExercise} addExercise={addExercise} /> : <></>}
+      <Header loggedIn={true} white={false} />
       <div className="profile-container">
         <div className="profile-info-wrapper">
           <div className="profile-info-left">
             <div className="profile-picture-wrapper">
-              <img className="profile-picture" src={profilePictureDisplay} key={profilePictureDisplay} alt="Profile"/>
+              <img className="profile-picture" src={userInfo.profilepicture} key={userInfo.profilepicture} alt="Profile"/>
             </div>
             {userInfo.name}
             <div className="profile-info-container">

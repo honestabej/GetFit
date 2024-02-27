@@ -1,21 +1,90 @@
 import './Info.scss'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import axios from 'axios'
 import { storage } from '../../../Firebase'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import LabelInput from '../../Inputs/LineInput/LabelInput'
 import ButtonFill from '../../Buttons/ButtonFill/ButtonFill'
 
+// Post info to DB, and after posted, rerender this component to set the new defaults
+async function postInfoToDB(userID, propsName, newName, propsEmail, newEmail, propsAge, newAge, propsProfilePicture, newProfilePicture, propsWeight, newWeight, propsGoal, newGoal, setUserInfo, setUserWeight, setUserGoal, setRight, setSaveMessage, setFile) {
+  // Initialie temp object with all of the original data, and change it as needed below
+  let temp = {'userid': userID, 'name': propsName, 'email': propsEmail, 'age': propsAge, 'profilepicture': propsProfilePicture, 'weight': propsWeight, 'goal': propsGoal }
+  setUserInfo({'userid': userID, 'name': newName, 'email': newEmail, 'age': newAge, 'profilepicture': ''})
+
+  if (propsName !== newName || propsEmail !== newEmail || propsAge !== newAge || propsProfilePicture !== newProfilePicture) {
+    await axios.put("http://localhost:3001/users/update-user-info", {
+      "userID": userID, 
+      "name": newName,
+      "email": newEmail,
+      "age": newAge, 
+      "profilePicture": newProfilePicture
+    }, {
+      "content-type": "application/json"
+    }).then(() => {
+      // Update the values in the profile component
+      setUserInfo({'userid': userID, 'name': newName, 'email': newEmail, 'age': newAge, 'profilepicture': newProfilePicture})
+    })
+
+    // Update the temp object with the new data
+    temp.name = newName
+    temp.email = newEmail
+    temp.age = newAge
+    temp.profilepicture = newProfilePicture
+  }
+
+  if (propsWeight !== newWeight) {
+    await axios.post("http://localhost:3001/users/update-weight", {
+      "userID": userID,
+      "weight": newWeight
+    }, {
+      "content-type": "application/json"
+    }).then(() => {
+      // Update the values in the profile component
+      setUserWeight({'weight': newWeight})
+    })
+
+    // Update the temp object with the new data
+    temp.weight = newWeight
+  }
+
+  if (propsGoal !== newGoal) {
+    await axios.post("http://localhost:3001/users/update-goal", {
+      "userID": userID,
+      "goal": newGoal
+    }, {
+      "content-type": "application/json"
+    }).then(() => {
+      // Update the values in the profile component
+      setUserGoal({'goal': newGoal})
+    })
+
+    // Update the temp object with the new data
+    temp.goal = newGoal
+  }
+
+  // Update the placeholders in this component
+  setRight(<Info userid={temp.userid} name={temp.name} age={temp.age} email={temp.email} profilepicture={temp.profilepicture} 
+    weight={temp.weight} goal={temp.goal} setuserinfo={setUserInfo} setuserweight={setUserWeight} setusergoal={setUserGoal} setright={setRight} />)
+
+  setFile(null)
+  setSaveMessage('Saved!')
+}
+
 function Info(props) {
   const [name, setName] = useState(props.name)
   const [age, setAge] = useState(props.age)
   const [email, setEmail] = useState(props.email)
-  const [profilePicture, setProfilePicture] = useState(props.profilePicture)
-  const [profilePictureDisplay, setProfilePictureDisplay] = useState(props.profilePicture)
-  const [file, setFile] = useState(null)
+  const [profilePicture, setProfilePicture] = useState(props.profilepicture)
   const [weight, setWeight] = useState(props.weight)
   const [goal, setGoal] = useState(props.goal)
+  const [file, setFile] = useState(null)
   const [errorMessage, setErrorMessage] = useState('')
-  const [isNewProfilePicture, setIsNewProfilePicture] = useState(false)
+  const [saveMessage, setSaveMessage] = useState('')
+
+  useEffect(() => {
+    console.log("New info rendered")
+  }, [])
 
   const nameChange = (e) => {
     if (e.target.value === '') {
@@ -35,8 +104,7 @@ function Info(props) {
 
   const profilePictureChange = (e) => {
     setFile(e.target.files[0])
-    setProfilePictureDisplay(URL.createObjectURL(e.target.files[0]))
-    setIsNewProfilePicture(true)
+    setProfilePicture(URL.createObjectURL(e.target.files[0]))
   }
 
   const weightChange = (e) => {
@@ -63,31 +131,37 @@ function Info(props) {
     }
   }
 
-  const saveInfo = (name, email, age, profilePicture, isNewProfilePicture, weight, goal) => {
-    setErrorMessage('')
-    let isValid = validateInputs(name, email, age, weight, goal)
+  // Process of saving new user info
+  const saveInfo = (name, email, age, profilePicture, weight, goal) => {
+    let isValidAndName = validateFormatInputs(name, email, age, weight, goal)
 
     // Ensure inputs are correctly formatted
-    if (isValid) {
+    if (isValidAndName[0]) {
+      setSaveMessage('Saving...')
+      // If file was changed, upload selected phot to firebase and get the url before posting to DB
       if (file !== null) {
-        // Only updates url in DB once, when changing from default pic. After that the url stays the same, but the image in Firebase is changed
         const imageRef = ref(storage, `profilePictures/${props.userid}`)
         uploadBytes(imageRef, file).then((snapshot) => {
           getDownloadURL(snapshot.ref).then((url) => {
             setProfilePicture(url)
           }).then(() => {
-            props.saveInfo(name, email, age, profilePicture, isNewProfilePicture, weight, goal)
+            // Save the new userInfo after the image has uploaded and url has been retrieved
+            postInfoToDB(props.userid, props.name, isValidAndName[1], props.email, email, props.age, age, props.profilepicture, profilePicture, props.weight, weight, props.goal, goal, props.setuserinfo, props.setuserweight, props.setusergoal, props.setright, setSaveMessage, setFile)
           })
         })
       } else {
-        props.saveInfo(name, email, age, profilePicture, isNewProfilePicture, weight, goal)
+        // Save the new userInfo after the image has uploaded
+        postInfoToDB(props.userid, props.name, isValidAndName[1], props.email, email, props.age, age, props.profilepicture, profilePicture, props.weight, weight, props.goal, goal, props.setuserinfo, props.setuserweight, props.setusergoal, props.setright, setSaveMessage, setFile)
       }
     }
   }
 
-  // Validate that inputs are valid types/lengths/etc
-  const validateInputs = (name, email, age, weight, goal) => {
-    // Validate that name has no numbers, isnt too long, and capitalize properly
+  // Validate and format inputs
+  const validateFormatInputs = (name, email, age, weight, goal) => {
+    // Reset error message
+    setErrorMessage('')
+
+    // Validate that name has no numbers, isnt too long, and then capitalize it properly
     var hasNumber = /\d/
     if (hasNumber.test(name)) {
       setErrorMessage('Name cannot contain numbers')
@@ -99,9 +173,12 @@ function Info(props) {
       return false
     }
 
-    const nameSplit = name.split(' ')
+    // Get rid of space at end if it is there
+    let newName = name.trim() 
+    const nameSplit = newName.split(' ')
     for (let i = 0; i < nameSplit.length; i++) {
       nameSplit[i] = nameSplit[i][0].toUpperCase() + nameSplit[i].substr(1)
+      console.log(nameSplit[i])
     }
     name = nameSplit.join(' ')
 
@@ -127,17 +204,17 @@ function Info(props) {
 
     // Verify that weight contains only numbers
     if (!isNumber.test(weight)) {
-      setErrorMessage('Invalid age')
+      setErrorMessage('Invalid weight')
       return false
     }
 
     // Verify that goal contains only numbers
     if (!isNumber.test(goal)) {
-      setErrorMessage('Invalid age')
+      setErrorMessage('Invalid goal')
       return false
     }
 
-    return true
+    return [true, name]
   }
 
   return (
@@ -145,7 +222,7 @@ function Info(props) {
       <div className="info-top-row">
         <div className="info-image-container">
           <div className="info-image-overlay"></div>
-          <img className="info-image" src={profilePictureDisplay} alt='Profile' />
+          <img className="info-image" src={profilePicture} alt='Profile' />
           <div className="info-image-icon">
             <label htmlFor="file-upload" className="info-file-upload">
               <i className="fa-solid fa-pen-to-square"></i>
@@ -172,10 +249,13 @@ function Info(props) {
         </div>
       </div>
       <div className="info-save-button-container">
-        <ButtonFill value={"Save Info"} color={"black"} onClick={() => saveInfo(name, email, age, profilePicture, isNewProfilePicture, weight, goal)} />
+        <ButtonFill value={"Save Info"} color={"black"} onClick={() => saveInfo(name, email, age, profilePicture, weight, goal)} />
       </div>
-      <div className="info-error-message-container">
+      <div className="info-message-container error">
         {errorMessage}
+      </div>
+      <div className="info-message-container save">
+        {saveMessage}
       </div>
     </div>
   )

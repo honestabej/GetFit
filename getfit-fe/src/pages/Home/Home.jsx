@@ -15,7 +15,6 @@ function Home(props) {
   useEffect(() => {
     // Check for current session
     axios.get("http://localhost:3001/users/login").then(res => {
-      console.log(res)
       if (res.data.loggedIn === false) { 
         setLoggedIn(false)
       } else {
