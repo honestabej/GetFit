@@ -6,21 +6,26 @@ import { ref, deleteObject } from 'firebase/storage'
 import AddButton from './../../Buttons/AddButton/AddButton'
 import LargePopup from '../../LargePopup/LargePopup'
 import Exercise from './Exercise/Exercise'
+import Dropdown from '../../Dropdown/Dropdown'
 
 function Exercises(props) {
   const [exercises, setExercises] = useState([])
   const [editingPopup, setEditingPopup] = useState(<></>)
   const [isEditingExercise, setIsEditingExercise] = useState(false)
   const [isAddingExercise, setIsAddingExercise] = useState(false)
+  const [categories, setCategories] = useState(['All', 'Upper', 'Lower'])
   const [currentCategory, setCurrentCategory] = useState('All')
+  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false)
+  const [currentSort, setCurrentSort] = useState()
+  const [isSortOpen, setIsSortOpen] = useState(false)
+  const sortOptions = ['A-Z', 'Recently Updated', 'Recently Completed']
 
   useEffect(() => {
     // Get all of user's exercises
     axios.get("http://localhost:3001/exercise/get-all?userID="+props.userid).then(res => {
-      console.log("Exercises retrieved")
       setExercises(res.data)
     })
-  }, [setExercises])
+  }, [setExercises, props.userid])
 
   // Add an exercise
   const saveExercise = (exerciseID, name, picture, weight, sets, reps) => {
@@ -36,7 +41,6 @@ function Exercises(props) {
       "content-type": "application/json"
     }).then(() => {
       axios.get("http://localhost:3001/exercise/get-all?userID="+props.userid).then(res => {
-        console.log("Exercises retrieved")
         setExercises(res.data)
         setIsAddingExercise(false)
       })
@@ -59,7 +63,6 @@ function Exercises(props) {
         "content-type": "application/json"
       }).then(() => {
         axios.get("http://localhost:3001/exercise/get-all?userID="+props.userid).then(res => {
-          console.log("Exercises retrieved")
           setExercises(res.data)
         })
       })
@@ -75,7 +78,6 @@ function Exercises(props) {
         "content-type": "application/json"
       }).then(() => {
         axios.get("http://localhost:3001/exercise/get-all?userID="+props.userid).then(res => {
-          console.log("Exercises retrieved")
           setExercises(res.data)
         })
       })
@@ -101,12 +103,14 @@ function Exercises(props) {
       {isAddingExercise ? <LargePopup popup={'AddExercise'} setIsAddingExercise={setIsAddingExercise} saveExercise={saveExercise} /> : <></>}
       <div className="exercises-top-container">
         <div className="categories-container">
-          Category: <span>{currentCategory} <i class="fa-solid fa-angle-down"></i></span>
+          Category: <span onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}>{currentCategory} <i className="fa-solid fa-angle-down"></i></span>
         </div>
-        <div className="sort-container">
-          Sort <i class="fa-solid fa-sort"></i>
+        <div className="sort-container" onClick={() => setIsSortOpen(!isSortOpen)}>
+          Sort <i className="fa-solid fa-sort"></i>
         </div>
       </div>
+      {isCategoriesOpen ? <Dropdown type={'categories'} inArray={categories} setIsCategoriesOpen={setIsCategoriesOpen} setCurrentCategory={setCurrentCategory} /> : <></> }
+      {isSortOpen ? <Dropdown type={'sort'} inArray={sortOptions} setIsSortOpen={setIsSortOpen} setCurrentSort={setCurrentSort} /> : <></> }
       <div className="exercises-container">
         {exercises ? 
           exercises.map(exercise => {

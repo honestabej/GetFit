@@ -81,7 +81,6 @@ const AddExercise = (props) => {
       const nameSplit = newName.split(' ')
       for (let i = 0; i < nameSplit.length; i++) {
         nameSplit[i] = nameSplit[i][0].toUpperCase() + nameSplit[i].substr(1)
-        console.log(nameSplit[i])
       }
       name = nameSplit.join(' ')
     }

@@ -21,11 +21,9 @@ function Profile(props) {
   const [right, setRight] = useState(<></>)
 
   useEffect(() => {
-    console.log("new profile rendered")
     // Check for current session
     axios.get("http://localhost:3001/users/login").then(res => {
       userID.current = res.data.user
-      // console.log(userID.current)
 
       // Get user data if logged in
       if (res.data.loggedIn) {
@@ -93,7 +91,6 @@ function Profile(props) {
   // Sign the user out and destroy the session
   const signOut = () => {
     axios.get("http://localhost:3001/users/logout").then(res => {
-      console.log("You have been logged out")
       window.location.href = '/'
     })
   }

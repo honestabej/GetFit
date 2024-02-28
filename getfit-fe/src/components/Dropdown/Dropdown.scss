@@ -1,0 +1,67 @@
+@import './../../global.scss';
+
+.dropdown {
+  height: 0px;
+  min-height: fit-content;
+  width: 120px;
+  min-width: fit-content;
+  display: flex;
+  flex-direction: column;
+  border-radius: 7px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  background-color: white;
+  position: absolute;
+
+  &.categories {
+    top: 40px;
+    left: 96px;
+  }
+
+  &.sort {
+    top: 40px;
+    right: 14px;
+  }
+
+  // animations
+  animation: slideDown 0.3s;
+  -webkit-animation: slideDown 0.3s; 
+}
+
+.dropdown-item {
+  height: 37px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  box-sizing: border-box;
+  padding: 0px 10px;
+  transition: ease 0.4s all;
+
+  &:hover {
+    cursor: pointer;
+    background-color: rgba(173, 173, 173, 0.3);
+  }
+}
+
+// Animations for dropdown
+@keyframes slideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-25%) 
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0%)  
+  }       
+}
+
+@-webkit-keyframes slideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-25%) 
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0%)  
+  }        
+}

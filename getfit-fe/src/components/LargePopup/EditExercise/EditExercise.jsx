@@ -129,7 +129,7 @@ const EditExercise = (props) => {
 
   return (
     <div className="edit-exercise-wrapper">
-      <div className="edit-exercise-delete" onClick={() => props.deleteExercise(props.exerciseid)} ><i class="fa-solid fa-trash"></i></div>
+      <div className="edit-exercise-delete" onClick={() => props.deleteExercise(props.exerciseid)} ><i className="fa-solid fa-trash"></i></div>
       <div className="edit-exercise-top-row">
         <div className="edit-exercise-img-container">
           <div className="edit-exercise-img-overlay"></div>

@@ -1,5 +1,5 @@
 import './Info.scss'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import axios from 'axios'
 import { storage } from '../../../Firebase'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
@@ -81,10 +81,6 @@ function Info(props) {
   const [file, setFile] = useState(null)
   const [errorMessage, setErrorMessage] = useState('')
   const [saveMessage, setSaveMessage] = useState('')
-
-  useEffect(() => {
-    console.log("New info rendered")
-  }, [])
 
   const nameChange = (e) => {
     if (e.target.value === '') {
@@ -179,7 +175,6 @@ function Info(props) {
     const nameSplit = newName.split(' ')
     for (let i = 0; i < nameSplit.length; i++) {
       nameSplit[i] = nameSplit[i][0].toUpperCase() + nameSplit[i].substr(1)
-      console.log(nameSplit[i])
     }
     name = nameSplit.join(' ')
 
