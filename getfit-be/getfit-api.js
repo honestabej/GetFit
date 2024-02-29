@@ -417,7 +417,7 @@ app.delete('/exercise/delete', async (req, res) => {
 })
 
 // Get all Exercises of a User
-app.get('/exercise/get-all', async (req, res) => {
+app.get('/exercises/get-all', async (req, res) => {
   client.query(`WITH RecentHistory As (Select *, Row_Number() Over (Partition By exerciseID Order By changeDate Desc) RowNum From 
     (SELECT * FROM (SELECT * FROM Exercises WHERE userID = '${req.query.userID}') AS Temp1 JOIN History USING(exerciseID)) AS Temp2) 
     SELECT * FROM RecentHistory WHERE RowNum = 1;`, async (err, result) => {
@@ -431,10 +431,10 @@ app.get('/exercise/get-all', async (req, res) => {
 })
 
 // Get all Exercises of a User with a specific Category
-app.get('/exercise/get-category', async (req, res) => {
+app.get('/exercises/get-category', async (req, res) => {
   client.query(`WITH RecentHistory As (Select *, Row_Number() Over (Partition By exerciseID Order By changeDate Desc) RowNum From 
     (SELECT * FROM (SELECT * FROM Exercises WHERE userID = '${req.query.userID}') AS Temp1 JOIN History USING(exerciseID)) AS Temp2) 
-    SELECT * FROM RecentHistory WHERE RowNum = 1 AND '${req.query.categories}' = ANY(categories);`, async (err, result) => {
+    SELECT * FROM RecentHistory WHERE RowNum = 1 AND '${req.query.category}' = ANY(categories);`, async (err, result) => {
     if (!err) {
       logging(res, result.rows, 'User '+req.query.userID+' exercises of category '+req.query.categories+' retrieved successfully', true)
     } else {
@@ -462,6 +462,17 @@ app.get('/exercises/get-categories', async (req, res) => {
       logging(res, temp, 'User '+req.query.userID+' categories retrieved successfully', true)
     }else {
       logging(res, '', "Error @: Getting categories -> "+err.message, false)
+    }
+  })
+})
+
+// Get all categories of an exercise
+app.get('/exercise/get-categories', async (req, res) => {
+  client.query(`SELECT categories FROM Exercises WHERE exerciseID = '${req.query.exerciseID}';`, async (err, result) => {
+    if (!err) {
+      logging(res, result.rows[0].categories, 'Categories of '+req.query.exerciseID+' exercise retrieved successfully', true)
+    } else {
+      logging(res, '', "Error @: Getting categories of exercise -> "+err.message, false)
     }
   })
 })

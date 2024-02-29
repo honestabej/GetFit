@@ -11,6 +11,29 @@ const SelectOrAddCategory = (props) => {
   const categories = useRef(props.categories)
 
   useEffect(() => {
+    const deleteCategory = (category) => {
+      categories.current = categories.current.filter(function(item) { return item !== category })
+      props.setCategories(categories.current)
+      configureDropdown()
+    }
+  
+    const addCategory = (category) => {
+      // TODO capitalization
+      categories.current.push(category)
+      props.setCategories(categories.current) 
+      configureDropdown()
+    }
+
+    const configureDropdown = () => {
+      let temp = []
+      categories.current.map(category => {
+        temp.push(<Category category={category} deleteCategory={deleteCategory} />)
+        return <></>
+      })
+      temp.push(<AddCategory categoryAdding={categoryAdding} addCategory={addCategory} />)
+      setDropdown(temp)
+    }
+
     if (!props.isNew) {
       let temp = []
       props.categories.map(category => {
@@ -23,29 +46,7 @@ const SelectOrAddCategory = (props) => {
       categories.current = []
       setDropdown([<AddCategory categoryAdding={categoryAdding} addCategory={addCategory} />])
     }
-  }, [props.isNew, props.categories])
-
-  const deleteCategory = (category) => {
-    categories.current = categories.current.filter(function(item) { return item !== category })
-    props.setCategories(categories.current)
-    configureDropdown()
-  }
-
-  const addCategory = (category) => {
-    categories.current.push(category)
-    props.setCategories(categories.current)
-    configureDropdown()
-  }
-
-  const configureDropdown = () => {
-    let temp = []
-    categories.current.map(category => {
-      temp.push(<Category category={category} deleteCategory={deleteCategory} />)
-      return <></>
-    })
-    temp.push(<AddCategory categoryAdding={categoryAdding} addCategory={addCategory} />)
-    setDropdown(temp)
-  }
+  }, [props])
 
   return (
     <div className="select-or-add-category-wrapper">

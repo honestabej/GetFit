@@ -29,7 +29,7 @@ function Exercises(props) {
 
   useEffect(() => {
     // Get all of user's exercises
-    axios.get("http://localhost:3001/exercise/get-all?userID="+props.userid).then(res => {
+    axios.get("http://localhost:3001/exercises/get-all?userID="+props.userid).then(res => {
       setExercises(res.data)
     })
 
@@ -119,11 +119,11 @@ function Exercises(props) {
   // Display only exercises from selected category
   const displayCategory = (category) => {
     if (category !== 'All') {
-      axios.get("http://localhost:3001/exercise/get-category?userID="+props.userid+"&category="+category).then(res => {
+      axios.get("http://localhost:3001/exercises/get-category?userID="+props.userid+"&category="+category).then(res => {
         setExercises(res.data)
       })
     } else {
-      axios.get("http://localhost:3001/exercise/get-all?userID="+props.userid).then(res => {
+      axios.get("http://localhost:3001/exercises/get-all?userID="+props.userid).then(res => {
         setExercises(res.data)
       })
     }
