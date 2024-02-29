@@ -1,0 +1,28 @@
+.category-wrapper {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 0px 15px 0px 20px;
+
+  i {
+    font-size: 14px;
+    height: 25px;
+    width: 25px;
+    color: red;
+    box-sizing: border-box;
+    padding: 8px;
+    border-radius: 7px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: ease 0.4s all;
+  
+    &:hover {
+      cursor: pointer;
+      background-color: rgba(255, 89, 89, 0.3);
+    }
+  }
+}

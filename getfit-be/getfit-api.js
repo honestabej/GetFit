@@ -434,9 +434,9 @@ app.get('/exercise/get-all', async (req, res) => {
 app.get('/exercise/get-category', async (req, res) => {
   client.query(`WITH RecentHistory As (Select *, Row_Number() Over (Partition By exerciseID Order By changeDate Desc) RowNum From 
     (SELECT * FROM (SELECT * FROM Exercises WHERE userID = '${req.query.userID}') AS Temp1 JOIN History USING(exerciseID)) AS Temp2) 
-    SELECT * FROM RecentHistory WHERE RowNum = 1 AND category = '${req.query.category}';`, async (err, result) => {
+    SELECT * FROM RecentHistory WHERE RowNum = 1 AND '${req.query.categories}' = ANY(categories);`, async (err, result) => {
     if (!err) {
-      logging(res, result.rows, 'User '+req.query.userID+' exercises of category '+req.query.category+' retrieved successfully', true)
+      logging(res, result.rows, 'User '+req.query.userID+' exercises of category '+req.query.categories+' retrieved successfully', true)
     } else {
       logging(res, '', "Error @: Getting exercises of user with category -> "+err.message, false)
     }
@@ -444,12 +444,23 @@ app.get('/exercise/get-category', async (req, res) => {
   client.end
 })
 
-// Get all categories a User has workouts of
-app.get('/exercise/get-categories', async (req, res) => {
-  client.query(`SELECT DISTINCT category FROM Exercises WHERE userid = '${req.query.userID}';`, async (err, result) => {
+// Get all categories a user has made
+app.get('/exercises/get-categories', async (req, res) => {
+  client.query(`SELECT categories FROM Exercises WHERE userid = '${req.query.userID}';`, async (err, result) => {
     if (!err) {
-      logging(res, result.rows, 'User '+req.query.userID+' categories retrieved successfully', true)
-    } else {
+      // Move all of the categories into an array
+      let temp = []
+      for (let i = 0; i < result.rows.length; i++) {
+        if (result.rows[i].categories !== null) {
+          for (let j = 0; j < result.rows[i].categories.length; j++) {
+            temp.push(result.rows[i].categories[j])
+          }
+        }
+      }
+      // Remove all of the duplicate values
+      temp = temp.reduce(function(a,b){if(a.indexOf(b)<0)a.push(b);return a;},[]);
+      logging(res, temp, 'User '+req.query.userID+' categories retrieved successfully', true)
+    }else {
       logging(res, '', "Error @: Getting categories -> "+err.message, false)
     }
   })

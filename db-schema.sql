@@ -33,7 +33,7 @@ CREATE TABLE Exercises (
     exerciseID VARCHAR(100),
     name VARCHAR(100),
     picture VARCHAR(500),
-    category VARCHAR(100),
+    categories text[],
     PRIMARY KEY(exerciseID),
     FOREIGN KEY(userID) REFERENCES Users ON DELETE CASCADE
 );

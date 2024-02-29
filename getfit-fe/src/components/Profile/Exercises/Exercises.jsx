@@ -8,27 +8,46 @@ import LargePopup from '../../LargePopup/LargePopup'
 import Exercise from './Exercise/Exercise'
 import Dropdown from '../../Dropdown/Dropdown'
 
+function compareStrings(a, b) {
+  // Assuming you want case-insensitive comparison
+  a = a.toLowerCase();
+  b = b.toLowerCase();
+
+  return (a < b) ? -1 : (a > b) ? 1 : 0;
+}
+
 function Exercises(props) {
   const [exercises, setExercises] = useState([])
   const [editingPopup, setEditingPopup] = useState(<></>)
   const [isEditingExercise, setIsEditingExercise] = useState(false)
   const [isAddingExercise, setIsAddingExercise] = useState(false)
-  const [categories, setCategories] = useState(['All', 'Upper', 'Lower'])
+  const [categories, setCategories] = useState([<span>All</span>])
   const [currentCategory, setCurrentCategory] = useState('All')
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false)
-  const [currentSort, setCurrentSort] = useState()
   const [isSortOpen, setIsSortOpen] = useState(false)
-  const sortOptions = ['A-Z', 'Recently Updated', 'Recently Completed']
+  const sortOptions = [<span>A-Z</span>, <span>Recently Added</span>, <span>Recently Updated</span>, <span>Recently Completed</span>]
 
   useEffect(() => {
     // Get all of user's exercises
     axios.get("http://localhost:3001/exercise/get-all?userID="+props.userid).then(res => {
       setExercises(res.data)
     })
-  }, [setExercises, props.userid])
+
+    // Get all of user's categories
+    axios.get("http://localhost:3001/exercises/get-categories?userID="+props.userid).then(res => {
+      let retCategories = [<span>All</span>] // Set default array
+      if(res.data.length > 0) {
+        for (let i = 0; i < res.data.length; i++) {
+          res.data[i] = <span>{res.data[i]}</span> // Put the categories in the span tag
+        }
+        retCategories = retCategories.concat(res.data) // Merge the default and get results arrays
+      }
+      setCategories(retCategories)
+    })
+  }, [setExercises, setCategories, props.userid])
 
   // Add an exercise
-  const saveExercise = (exerciseID, name, picture, weight, sets, reps) => {
+  const saveExercise = (exerciseID, name, picture, categories, weight, sets, reps) => {
     axios.post("http://localhost:3001/exercise/create", {
       "userID": props.userid,
       "exerciseID": exerciseID,
@@ -49,7 +68,7 @@ function Exercises(props) {
 
   // Edit an exercise
   const editExerciseClicked = (exerciseID, name, picture, weight, sets, reps) => {
-    setEditingPopup(<LargePopup popup={'EditExercise'} setIsEditingExercise={setIsEditingExercise} editExercise={editExercise} deleteExercise={deleteExercise} exerciseid={exerciseID} name={name} picture={picture} weight={weight} sets={sets} reps={reps} />)
+    setEditingPopup(<LargePopup popup={'EditExercise'} setIsEditingExercise={setIsEditingExercise} editExercise={editExercise} deleteExercise={deleteExercise} categories={categories} exerciseid={exerciseID} name={name} picture={picture} weight={weight} sets={sets} reps={reps} />)
     setIsEditingExercise(true)
   }
 
@@ -89,7 +108,7 @@ function Exercises(props) {
   const deleteExercise = (exerciseID) => {
     axios.delete("http://localhost:3001/exercise/delete?exerciseID="+exerciseID).then ( res => {
       const imageRef = ref(storage, `exercisePictures/${exerciseID}`)
-      deleteObject(imageRef)
+      deleteObject(imageRef) // TODO dont do this if image was defualt
       axios.get("http://localhost:3001/exercise/get-all?userID="+props.userid).then(res => {
         setExercises(res.data)
       })
@@ -97,10 +116,38 @@ function Exercises(props) {
     setIsEditingExercise(false)
   }
 
+  // Display only exercises from selected category
+  const displayCategory = (category) => {
+    if (category !== 'All') {
+      axios.get("http://localhost:3001/exercise/get-category?userID="+props.userid+"&category="+category).then(res => {
+        setExercises(res.data)
+      })
+    } else {
+      axios.get("http://localhost:3001/exercise/get-all?userID="+props.userid).then(res => {
+        setExercises(res.data)
+      })
+    }
+  }
+
+  // Sort the exercises based on the sorting method
+  const sortExercises = (method) => {
+    if (method === 'A-Z') {
+      exercises.sort(function(a, b) {
+        return compareStrings(a.name, b.name);
+      })
+    } else if (method === 'Recently Added') {
+      console.log('Sorting Recently Added')
+    } else if (method === 'Recently Updated') {
+      console.log('Sorting Recently Updated')
+    } else if (method === 'Recently Completed') {
+      console.log('Sorting Recently Completed')
+    }
+  }
+
   return (
     <div className="exercises-wrapper">
       {isEditingExercise ? editingPopup : <></> }
-      {isAddingExercise ? <LargePopup popup={'AddExercise'} setIsAddingExercise={setIsAddingExercise} saveExercise={saveExercise} /> : <></>}
+      {isAddingExercise ? <LargePopup popup={'AddExercise'} setIsAddingExercise={setIsAddingExercise} saveExercise={saveExercise} categories={categories} /> : <></>}
       <div className="exercises-top-container">
         <div className="categories-container">
           Category: <span onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}>{currentCategory} <i className="fa-solid fa-angle-down"></i></span>
@@ -109,8 +156,8 @@ function Exercises(props) {
           Sort <i className="fa-solid fa-sort"></i>
         </div>
       </div>
-      {isCategoriesOpen ? <Dropdown type={'categories'} inArray={categories} setIsCategoriesOpen={setIsCategoriesOpen} setCurrentCategory={setCurrentCategory} /> : <></> }
-      {isSortOpen ? <Dropdown type={'sort'} inArray={sortOptions} setIsSortOpen={setIsSortOpen} setCurrentSort={setCurrentSort} /> : <></> }
+      {isCategoriesOpen ? <Dropdown type={'categories'} inArray={categories} setIsCategoriesOpen={setIsCategoriesOpen} setCurrentCategory={setCurrentCategory} displayCategory={displayCategory} /> : <></> }
+      {isSortOpen ? <Dropdown type={'sort'} inArray={sortOptions} setIsSortOpen={setIsSortOpen} sortExercises={sortExercises} /> : <></> }
       <div className="exercises-container">
         {exercises ? 
           exercises.map(exercise => {

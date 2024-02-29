@@ -22,6 +22,12 @@
     right: 14px;
   }
 
+  &.exercise {
+    top: 37px;
+    left: 0;
+    width: 100%;
+  }
+
   // animations
   animation: slideDown 0.3s;
   -webkit-animation: slideDown 0.3s; 
@@ -33,13 +39,20 @@
   display: flex;
   align-items: center;
   justify-content: left;
-  box-sizing: border-box;
-  padding: 0px 10px;
   transition: ease 0.4s all;
 
-  &:hover {
-    cursor: pointer;
-    background-color: rgba(173, 173, 173, 0.3);
+  span {  
+    display: flex;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0px 15px;
+
+    &:hover {
+      cursor: pointer;
+      background-color: rgba(173, 173, 173, 0.3);
+    }
   }
 }
 

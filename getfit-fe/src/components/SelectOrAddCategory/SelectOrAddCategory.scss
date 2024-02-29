@@ -1,0 +1,51 @@
+@import './../../global.scss';
+
+.select-or-add-category-wrapper {
+  height: 100%;
+  width: 100%;
+  border-radius: 7px;
+  border: 1px solid black;
+  box-sizing: border-box;
+  padding: 0px 15px;
+  background-color: white;
+  position: relative;
+}
+
+.select-or-add-category-container {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.select-or-add-category-item {
+
+}
+
+// Animations for dropdown
+@keyframes slideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-25%) 
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0%)  
+  }       
+}
+
+@-webkit-keyframes slideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-25%) 
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0%)  
+  }        
+}

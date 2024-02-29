@@ -7,6 +7,7 @@ import LabelInput from '../../Inputs/LineInput/LabelInput'
 import DefaultPicture from './.././../../images/Default_Exercise.png'
 import ButtonFill from '../../Buttons/ButtonFill/ButtonFill'
 import ButtonNoFill from '../../Buttons/ButtonNoFill/ButtonNoFill'
+import SelectOrAddCategory from '../../SelectOrAddCategory/SelectOrAddCategory'
 
 const AddExercise = (props) => {
   const [name, setName] = useState()
@@ -14,6 +15,7 @@ const AddExercise = (props) => {
   const [weight, setWeight] = useState()
   const [sets, setSets] = useState()
   const [reps, setReps] = useState()
+  const [categories, setCategories] = useState([])
   const [file, setFile] = useState(null)
   const [errorMessage, setErrorMessage] = useState('')
   const [saveMessage, setSaveMessage] = useState('')
@@ -55,12 +57,12 @@ const AddExercise = (props) => {
             pictureUrl = url
           }).then(() => {
             // Save the new userInfo after the image has uploaded and url has been retrieved
-            props.saveExercise(exerciseID, name, pictureUrl, weight, sets, reps)
+            props.saveExercise(exerciseID, name, pictureUrl, categories, weight, sets, reps)
           })
         })
       } else {
         // Save the new userInfo after the image has uploaded
-        props.saveExercise(exerciseID, name, pictureUrl, weight, sets, reps)
+        props.saveExercise(exerciseID, name, pictureUrl, categories, weight, sets, reps)
       }
     }
   }
@@ -141,6 +143,9 @@ const AddExercise = (props) => {
         <div className="add-exercise-bottom-input">
           <LabelInput placeholder={'0'} label={'Reps'} center={'center'} onChange={repsChange} />
         </div>
+      </div>
+      <div className="add-exercise-category-container">
+        <SelectOrAddCategory isNew={true} setCategories={setCategories} />
       </div>
       <div className="add-exercise-btns-container">
         <div className="add-exercise-btn">
