@@ -25,12 +25,13 @@ function Exercises(props) {
   const [currentCategory, setCurrentCategory] = useState('All')
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false)
   const [isSortOpen, setIsSortOpen] = useState(false)
-  const sortOptions = [<span>A-Z</span>, <span>Recently Added</span>, <span>Recently Updated</span>, <span>Recently Completed</span>]
+  const sortOptions = [<span>A-Z</span>, <span>Recently Added</span>, <span>Recently Updated</span>] // TODO: Add "<span>Recently Completed</span>" to this array after completed feature is added
 
   useEffect(() => {
     // Get all of user's exercises
     axios.get("http://localhost:3001/exercises/get-all?userID="+props.userid).then(res => {
       setExercises(res.data)
+      setCurrentCategory('All')
     })
 
     // Get all of user's categories
@@ -48,41 +49,71 @@ function Exercises(props) {
 
   // Add an exercise
   const saveExercise = (exerciseID, name, picture, categories, weight, sets, reps) => {
+    categories = formatCategories(categories)
+    
     axios.post("http://localhost:3001/exercise/create", {
       "userID": props.userid,
       "exerciseID": exerciseID,
       "name": name,
       "picture": picture,
+      "categories": categories,
       "weight": weight,
       "reps": reps, 
       "sets": sets
     }, {
       "content-type": "application/json"
     }).then(() => {
-      axios.get("http://localhost:3001/exercise/get-all?userID="+props.userid).then(res => {
+      axios.get("http://localhost:3001/exercises/get-all?userID="+props.userid).then(res => {
         setExercises(res.data)
+        setCurrentCategory('All')
         setIsAddingExercise(false)
+      }).then(() => {
+        axios.get("http://localhost:3001/exercises/get-categories?userID="+props.userid).then(res => {
+          let retCategories = [<span>All</span>] // Set default array
+          if(res.data.length > 0) {
+            for (let i = 0; i < res.data.length; i++) {
+              res.data[i] = <span>{res.data[i]}</span> // Put the categories in the span tag
+            }
+            retCategories = retCategories.concat(res.data) // Merge the default and get results arrays
+          }
+          setCategories(retCategories)
+        })
       })
     })
   }
 
   // Edit an exercise
-  const editExerciseClicked = (exerciseID, name, picture, weight, sets, reps) => {
-    setEditingPopup(<LargePopup popup={'EditExercise'} setIsEditingExercise={setIsEditingExercise} editExercise={editExercise} deleteExercise={deleteExercise} categories={categories} exerciseid={exerciseID} name={name} picture={picture} weight={weight} sets={sets} reps={reps} />)
+  const editExerciseClicked = (exerciseID, name, picture, categories, weight, sets, reps) => {
+    setEditingPopup(<LargePopup popup={'EditExercise'} setIsEditingExercise={setIsEditingExercise} editExercise={editExercise} deleteExercise={deleteExercise} exerciseid={exerciseID} name={name} picture={picture} categories={categories} weight={weight} sets={sets} reps={reps} />)
     setIsEditingExercise(true)
   }
 
-  const editExercise = (exerciseID, name, picture, weight, sets, reps, isExerciseInfoChanged, isExerciseHistoryChanged) => {
+  const editExercise = (exerciseID, name, picture, categories, weight, sets, reps, isExerciseInfoChanged, isExerciseHistoryChanged) => {
+    categories = formatCategories(categories)
+    
     if (isExerciseInfoChanged) {
       axios.put("http://localhost:3001/exercise/update-info", {
         "exerciseID": exerciseID, 
         "name": name,
-        "picture": picture
+        "picture": picture,
+        "categories": categories
       }, {
         "content-type": "application/json"
       }).then(() => {
-        axios.get("http://localhost:3001/exercise/get-all?userID="+props.userid).then(res => {
+        axios.get("http://localhost:3001/exercises/get-all?userID="+props.userid).then(res => {
           setExercises(res.data)
+          setCurrentCategory('All')
+        }).then(() => {
+          axios.get("http://localhost:3001/exercises/get-categories?userID="+props.userid).then(res => {
+            let retCategories = [<span>All</span>] // Set default array
+            if(res.data.length > 0) {
+              for (let i = 0; i < res.data.length; i++) {
+                res.data[i] = <span>{res.data[i]}</span> // Put the categories in the span tag
+              }
+              retCategories = retCategories.concat(res.data) // Merge the default and get results arrays
+            }
+            setCategories(retCategories)
+          })
         })
       })
     }
@@ -96,21 +127,65 @@ function Exercises(props) {
       }, {
         "content-type": "application/json"
       }).then(() => {
-        axios.get("http://localhost:3001/exercise/get-all?userID="+props.userid).then(res => {
+        axios.get("http://localhost:3001/exercises/get-all?userID="+props.userid).then(res => {
           setExercises(res.data)
+          setCurrentCategory('All')
+        }).then(() => {
+          axios.get("http://localhost:3001/exercises/get-categories?userID="+props.userid).then(res => {
+            let retCategories = [<span>All</span>] // Set default array
+            if(res.data.length > 0) {
+              for (let i = 0; i < res.data.length; i++) {
+                retCategories.push(<span>{res.data[i]}</span>) // Put the categories in the span tag
+              }
+            }
+            setCategories(retCategories)
+          })
         })
       })
     }
     setIsEditingExercise(false)
   }
 
+  // Format the categories array for postgres
+  const formatCategories = (categories) => {
+    let temp = '{'
+    for (let i = 0; i < categories.length; i++) {
+      temp += '"' +categories[i] + '"'
+      if (i !== categories.length-1) {
+        temp += ', '
+      } 
+    }
+    temp += '}'
+    return temp
+  }
+
   // Delete an exercise
-  const deleteExercise = (exerciseID) => {
+  const deleteExercise = (exerciseID, picture) => {
     axios.delete("http://localhost:3001/exercise/delete?exerciseID="+exerciseID).then ( res => {
-      const imageRef = ref(storage, `exercisePictures/${exerciseID}`)
-      deleteObject(imageRef) // TODO dont do this if image was defualt
-      axios.get("http://localhost:3001/exercise/get-all?userID="+props.userid).then(res => {
-        setExercises(res.data)
+      if (picture !== 'https://firebasestorage.googleapis.com/v0/b/getfit-5d057.appspot.com/o/exercisePictures%2FDefault_Exercise.png?alt=media&token=3d89bc09-dfa0-4c5b-871f-a1a254e44ca7') {
+        const imageRef = ref(storage, `exercisePictures/${exerciseID}`)
+        deleteObject(imageRef).catch(err => {console.log("Could not delete from firebase")})
+      }
+      axios.get("http://localhost:3001/exercises/get-categories?userID="+props.userid).then(res => {
+        let retCategories = [<span>All</span>] // Set default array
+        if(res.data.length > 0) {
+          for (let i = 0; i < res.data.length; i++) {
+            retCategories.push(<span>{res.data[i]}</span>) // Put the categories in the span tag
+          }
+        }
+        setCategories(retCategories)
+
+        // If the deleted exercise was the last of its category, reset current category to all and get all, if not stay in the current category
+        if (res.data.includes(currentCategory)) {
+          axios.get("http://localhost:3001/exercises/get-category?userID="+props.userid+"&category="+currentCategory).then(res => {
+            setExercises(res.data)
+          })
+        } else {
+          axios.get("http://localhost:3001/exercises/get-all?userID="+props.userid).then(res => {
+            setExercises(res.data)
+            setCurrentCategory('All')
+          })
+        }
       })
     })
     setIsEditingExercise(false)
@@ -125,6 +200,7 @@ function Exercises(props) {
     } else {
       axios.get("http://localhost:3001/exercises/get-all?userID="+props.userid).then(res => {
         setExercises(res.data)
+        setCurrentCategory('All')
       })
     }
   }
@@ -139,9 +215,11 @@ function Exercises(props) {
       console.log('Sorting Recently Added')
     } else if (method === 'Recently Updated') {
       console.log('Sorting Recently Updated')
-    } else if (method === 'Recently Completed') {
-      console.log('Sorting Recently Completed')
-    }
+    } 
+    // TODO: Implement recently completed sorting after completed feature is added
+    // else if (method === 'Recently Completed') {
+    //   console.log('Sorting Recently Completed')
+    // }
   }
 
   return (
@@ -162,7 +240,7 @@ function Exercises(props) {
         {exercises ? 
           exercises.map(exercise => {
             return (
-              <div className="exercise" key={exercise.exerciseid} onClick={() => editExerciseClicked(exercise.exerciseid, exercise.name, exercise.picture, exercise.weight, exercise.sets, exercise.reps)}>
+              <div className="exercise" key={exercise.exerciseid} onClick={() => editExerciseClicked(exercise.exerciseid, exercise.name, exercise.picture, exercise.categories, exercise.weight, exercise.sets, exercise.reps)}>
                 <Exercise exerciseid={exercise.exerciseid} name={exercise.name} picture={exercise.picture} weight={exercise.weight} sets={exercise.sets} reps={exercise.reps} />
               </div>
             )

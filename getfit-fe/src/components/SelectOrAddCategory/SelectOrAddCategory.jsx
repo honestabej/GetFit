@@ -5,10 +5,10 @@ import Category from './Category/Category'
 import AddCategory from './AddCategory/AddCategory'
 
 const SelectOrAddCategory = (props) => {
-  const categoryAdding = useRef('') 
+  
   const [isOpen, setIsOpen] = useState(false) 
   const [dropDown, setDropdown] = useState([])
-  const categories = useRef(props.categories)
+  const categories = useRef(JSON.parse(JSON.stringify(props.categories))) // want just the value not pass by reference
 
   useEffect(() => {
     const deleteCategory = (category) => {
@@ -19,9 +19,19 @@ const SelectOrAddCategory = (props) => {
   
     const addCategory = (category) => {
       // TODO capitalization
-      categories.current.push(category)
-      props.setCategories(categories.current) 
-      configureDropdown()
+      if (category !== '') {
+
+        let newCategory = category.trim() 
+        const categorySplit = newCategory.split(' ')
+        for (let i = 0; i < categorySplit.length; i++) {
+          categorySplit[i] = categorySplit[i][0].toUpperCase() + categorySplit[i].substr(1)
+        }
+        category = categorySplit.join(' ')
+
+        categories.current.push(category)
+        props.setCategories(categories.current) 
+        configureDropdown()
+      }
     }
 
     const configureDropdown = () => {
@@ -30,22 +40,11 @@ const SelectOrAddCategory = (props) => {
         temp.push(<Category category={category} deleteCategory={deleteCategory} />)
         return <></>
       })
-      temp.push(<AddCategory categoryAdding={categoryAdding} addCategory={addCategory} />)
+      temp.push(<AddCategory addCategory={addCategory} />)
       setDropdown(temp)
     }
 
-    if (!props.isNew) {
-      let temp = []
-      props.categories.map(category => {
-        temp.push(<Category category={category} deleteCategory={deleteCategory} />)
-        return <></>
-      })
-      temp.push(<AddCategory categoryAdding={categoryAdding} addCategory={addCategory} />)
-      setDropdown(temp)
-    } else {
-      categories.current = []
-      setDropdown([<AddCategory categoryAdding={categoryAdding} addCategory={addCategory} />])
-    }
+    configureDropdown()
   }, [props])
 
   return (

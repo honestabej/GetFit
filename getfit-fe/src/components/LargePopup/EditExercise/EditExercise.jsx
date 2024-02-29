@@ -1,10 +1,11 @@
 import './EditExercise.scss'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { storage } from './../../../Firebase'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import LabelInput from '../../Inputs/LineInput/LabelInput'
 import ButtonFill from '../../Buttons/ButtonFill/ButtonFill'
 import ButtonNoFill from '../../Buttons/ButtonNoFill/ButtonNoFill'
+import SelectOrAddCategory from '../../SelectOrAddCategory/SelectOrAddCategory'
 
 const EditExercise = (props) => {
   const [name, setName] = useState(props.name)
@@ -12,6 +13,7 @@ const EditExercise = (props) => {
   const [weight, setWeight] = useState(props.weight)
   const [sets, setSets] = useState(props.sets)
   const [reps, setReps] = useState(props.reps)
+  const [categories, setCategories] = useState(props.categories)
   const [file, setFile] = useState(null)
   const [errorMessage, setErrorMessage] = useState('')
   const [savingMessage, setSavingMessage] = useState('')
@@ -53,8 +55,8 @@ const EditExercise = (props) => {
     }
   }
 
-  const editExercise = (exerciseID, name, picture, weight, sets, reps) => {
-    let isValidAndName = validateFormatInputs(name, picture, weight, sets, reps)
+  const editExercise = (exerciseID, name, picture, categories, weight, sets, reps) => {
+    let isValidAndName = validateFormatInputs(name, picture, categories, weight, sets, reps)
 
     if (isValidAndName.isValid) {
       setSavingMessage('Saving...')
@@ -66,16 +68,16 @@ const EditExercise = (props) => {
           getDownloadURL(snapshot.ref).then((url) => {
             picture = url
           }).then(() => {
-            props.editExercise(exerciseID, isValidAndName.name, picture, weight, sets, reps, isValidAndName.isExerciseInfoChanged, isValidAndName.isExerciseHistoryChanged)
+            props.editExercise(exerciseID, isValidAndName.name, picture, weight, categories, sets, reps, isValidAndName.isExerciseInfoChanged, isValidAndName.isExerciseHistoryChanged)
           })
         })
       } else {
-        props.editExercise(exerciseID, isValidAndName.name, picture, weight, sets, reps, isValidAndName.isExerciseInfoChanged, isValidAndName.isExerciseHistoryChanged)
+        props.editExercise(exerciseID, isValidAndName.name, picture, categories, weight, sets, reps, isValidAndName.isExerciseInfoChanged, isValidAndName.isExerciseHistoryChanged)
       }
     }
   }
 
-  const validateFormatInputs = (name, picture, weight, sets, reps) => {
+  const validateFormatInputs = (name, picture, categories, weight, sets, reps) => {
     setErrorMessage('')
     let isExerciseInfoChanged = false
     let isExerciseHistoryChanged = false
@@ -115,7 +117,7 @@ const EditExercise = (props) => {
     }
 
     // Check if exercise info has changed
-    if (name !== props.name || picture !== props.picture) {
+    if (name !== props.name || picture !== props.picture || categories !== props.categories) {
       isExerciseInfoChanged = true
     }
 
@@ -129,7 +131,7 @@ const EditExercise = (props) => {
 
   return (
     <div className="edit-exercise-wrapper">
-      <div className="edit-exercise-delete" onClick={() => props.deleteExercise(props.exerciseid)} ><i className="fa-solid fa-trash"></i></div>
+      <div className="edit-exercise-delete" onClick={() => props.deleteExercise(props.exerciseid, props.picture)} ><i className="fa-solid fa-trash"></i></div>
       <div className="edit-exercise-top-row">
         <div className="edit-exercise-img-container">
           <div className="edit-exercise-img-overlay"></div>
@@ -156,12 +158,15 @@ const EditExercise = (props) => {
           <LabelInput placeholder={props.reps} label={'Reps'} center={'center'} onChange={repsChange} />
         </div>
       </div>
+      <div className="edit-exercise-category-container">
+        <SelectOrAddCategory setCategories={setCategories} categories={categories} sets={sets} />
+      </div>
       <div className="edit-exercise-btns-container">
         <div className="edit-exercise-btn">
           <ButtonNoFill value={'Cancel'} onClick={() => props.setIsEditingExercise(false)} color={'red'} />
         </div>
         <div className="edit-exercise-btn">
-          <ButtonFill value={'Save'} onClick={() => editExercise(props.exerciseid, name, picture, weight, sets, reps)} />
+          <ButtonFill value={'Save'} onClick={() => editExercise(props.exerciseid, name, picture, categories, weight, sets, reps)} />
         </div>
       </div>
       <div className="edit-exercise-message error">

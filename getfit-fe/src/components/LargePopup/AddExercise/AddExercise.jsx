@@ -57,12 +57,12 @@ const AddExercise = (props) => {
             pictureUrl = url
           }).then(() => {
             // Save the new userInfo after the image has uploaded and url has been retrieved
-            props.saveExercise(exerciseID, name, pictureUrl, categories, weight, sets, reps)
+            props.saveExercise(exerciseID, isValidAndName[1], pictureUrl, categories, weight, sets, reps)
           })
         })
       } else {
         // Save the new userInfo after the image has uploaded
-        props.saveExercise(exerciseID, name, pictureUrl, categories, weight, sets, reps)
+        props.saveExercise(exerciseID, isValidAndName[1], pictureUrl, categories, weight, sets, reps)
       }
     }
   }
@@ -145,7 +145,7 @@ const AddExercise = (props) => {
         </div>
       </div>
       <div className="add-exercise-category-container">
-        <SelectOrAddCategory isNew={true} setCategories={setCategories} />
+        <SelectOrAddCategory setCategories={setCategories} categories={categories} />
       </div>
       <div className="add-exercise-btns-container">
         <div className="add-exercise-btn">

@@ -353,13 +353,12 @@ app.post('/users/update-goal', async (req, res) => {
 // Add an Exercise TODO: category implementation
 app.post('/exercise/create', async (req, res) => {
   let user = req.body
-  // let exerciseID = uuid() 
   let historyID = uuid()
   let changeDate = await getCurrentDate()
 
   client.query('BEGIN', (err, result) => {
     if(err) return rollback(client, res, "Error @: Beginning exercise creation -> "+err.message)
-    client.query(`INSERT INTO Exercises (userID, exerciseID, name, picture) VALUES ('${user.userID}', '${user.exerciseID}', '${user.name}', '${user.picture}');`, async(err, result) => {
+    client.query(`INSERT INTO Exercises (userID, exerciseID, name, picture, categories) VALUES ('${user.userID}', '${user.exerciseID}', '${user.name}', '${user.picture}', '${user.categories}');`, async(err, result) => {
       if(err) return rollback(client, res, "Error @: Inserting new exercise info -> "+err.message)
       client.query(`INSERT INTO History (exerciseID, historyID, sets, reps, weight, changeDate) VALUES ('${user.exerciseID}', '${historyID}', ${user.sets}, ${user.reps}, ${user.weight}, '${changeDate}');`, async (err, result) => {
         if(!err) { 
@@ -378,7 +377,7 @@ app.post('/exercise/create', async (req, res) => {
 app.put('/exercise/update-info', async (req, res) => {
   let user = req.body
 
-  client.query(`UPDATE Exercises SET name = '${user.name}', picture = '${user.picture}' WHERE exerciseID = '${user.exerciseID}';`, async (err, result) => {
+  client.query(`UPDATE Exercises SET name = '${user.name}', picture = '${user.picture}', categories = '${user.categories}' WHERE exerciseID = '${user.exerciseID}';`, async (err, result) => {
     if (!err) {
       logging(res, '', "Exercise info updated ", true)
     } else {
