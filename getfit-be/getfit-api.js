@@ -181,7 +181,6 @@ app.post('/users/login', async (req, res) => {
         if (response.rows[0] !== undefined){
           // Verify the given password and retrieved password match
           if (await bcrypt.compare(user.password, JSON.parse(JSON.stringify(response.rows[0])).password)) {
-            console.log("Successful login") 
             req.session.user = response.rows[0].userid
             logging(res, {loggedIn: true, user: req.session.user }, 'Login successful', true)
           } else {
@@ -350,17 +349,17 @@ app.post('/users/update-goal', async (req, res) => {
   })
 })
 
-// Add an Exercise TODO: category implementation
+// Add an Exercise
 app.post('/exercise/create', async (req, res) => {
   let user = req.body
   let historyID = uuid()
-  let changeDate = await getCurrentDate()
+  let date = await getCurrentDate()
 
   client.query('BEGIN', (err, result) => {
     if(err) return rollback(client, res, "Error @: Beginning exercise creation -> "+err.message)
-    client.query(`INSERT INTO Exercises (userID, exerciseID, name, picture, categories) VALUES ('${user.userID}', '${user.exerciseID}', '${user.name}', '${user.picture}', '${user.categories}');`, async(err, result) => {
+    client.query(`INSERT INTO Exercises (userID, exerciseID, name, picture, categories, createdDate) VALUES ('${user.userID}', '${user.exerciseID}', '${user.name}', '${user.picture}', '${user.categories}', '${date}');`, async(err, result) => {
       if(err) return rollback(client, res, "Error @: Inserting new exercise info -> "+err.message)
-      client.query(`INSERT INTO History (exerciseID, historyID, sets, reps, weight, changeDate) VALUES ('${user.exerciseID}', '${historyID}', ${user.sets}, ${user.reps}, ${user.weight}, '${changeDate}');`, async (err, result) => {
+      client.query(`INSERT INTO History (exerciseID, historyID, sets, reps, weight, changeDate) VALUES ('${user.exerciseID}', '${historyID}', ${user.sets}, ${user.reps}, ${user.weight}, '${date}');`, async (err, result) => {
         if(!err) { 
           logging(res, '', "Exercise created successfully", true)
           client.query('COMMIT')
@@ -373,7 +372,7 @@ app.post('/exercise/create', async (req, res) => {
   client.end
 })
 
-// Update exercise info TODO: Add category and picture
+// Update exercise info
 app.put('/exercise/update-info', async (req, res) => {
   let user = req.body
 
@@ -558,11 +557,14 @@ app.delete('/workout/delete-exercise', async (req, res) => {
 
 // Test
 app.get('/test', (req, res) => {
-  client.query(`SELECT * FROM Users WHERE userID = '${req.query.userID}';`, (err, result) => {
+  client.query(`WITH RecentHistory As (Select *, Row_Number() Over (Partition By exerciseID Order By changeDate Desc) RowNum From 
+    (SELECT * FROM (SELECT * FROM Exercises WHERE userID = '${req.query.userID}') AS Temp1 JOIN History USING(exerciseID)) AS Temp2) 
+    SELECT * FROM RecentHistory WHERE RowNum = 1;`, async (err, result) => {
     if (!err) {
-      logging(res, result.rows, '', true)
+      logging(res, result.rows, 'User '+req.query.userID+' exercises retrieved successfully', true)
     } else {
-      logging(res, '', "Error @: Test -> "+err.message, false)
-    }
+      logging(res, '', "Error @: Getting exercises of user -> "+err.message, false)
+    } 
   })
+  client.end
 }) 

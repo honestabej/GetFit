@@ -1,10 +1,11 @@
 @import './../../global.scss';
 
 .dropdown {
-  height: 0px;
-  min-height: fit-content;
+  height: fit-content;
+  max-height: 280px;
   width: 120px;
   min-width: fit-content;
+  overflow: scroll;
   display: flex;
   flex-direction: column;
   border-radius: 7px;
@@ -35,6 +36,7 @@
 
 .dropdown-item {
   height: 37px;
+  min-height: 37px; // Needed on chrome for some reason
   width: 100%;
   display: flex;
   align-items: center;

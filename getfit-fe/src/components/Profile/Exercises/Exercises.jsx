@@ -164,7 +164,7 @@ function Exercises(props) {
     axios.delete("http://localhost:3001/exercise/delete?exerciseID="+exerciseID).then ( res => {
       if (picture !== 'https://firebasestorage.googleapis.com/v0/b/getfit-5d057.appspot.com/o/exercisePictures%2FDefault_Exercise.png?alt=media&token=3d89bc09-dfa0-4c5b-871f-a1a254e44ca7') {
         const imageRef = ref(storage, `exercisePictures/${exerciseID}`)
-        deleteObject(imageRef).catch(err => {console.log("Could not delete from firebase")})
+        deleteObject(imageRef)
       }
       axios.get("http://localhost:3001/exercises/get-categories?userID="+props.userid).then(res => {
         let retCategories = [<span>All</span>] // Set default array
@@ -212,13 +212,17 @@ function Exercises(props) {
         return compareStrings(a.name, b.name);
       })
     } else if (method === 'Recently Added') {
-      console.log('Sorting Recently Added')
+      exercises.sort(function(a, b){
+        return new Date(a.createddate) < new Date(b.createddate) ? 1 : -1
+      })
     } else if (method === 'Recently Updated') {
-      console.log('Sorting Recently Updated')
+      exercises.sort(function(a, b){
+        return new Date(a.changedate) < new Date(b.changedate) ? 1 : -1
+      })
     } 
     // TODO: Implement recently completed sorting after completed feature is added
     // else if (method === 'Recently Completed') {
-    //   console.log('Sorting Recently Completed')
+
     // }
   }
 

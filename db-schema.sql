@@ -34,6 +34,7 @@ CREATE TABLE Exercises (
     name VARCHAR(100),
     picture VARCHAR(500),
     categories text[],
+    createdDate TIMESTAMP,
     PRIMARY KEY(exerciseID),
     FOREIGN KEY(userID) REFERENCES Users ON DELETE CASCADE
 );

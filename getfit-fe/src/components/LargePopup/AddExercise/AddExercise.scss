@@ -29,7 +29,8 @@
 }
 
 .add-exercise-img {
-  height: 100%;
+  min-width: 100%;
+  object-fit: cover;
 }
 
 .add-exercise-img-icon {
