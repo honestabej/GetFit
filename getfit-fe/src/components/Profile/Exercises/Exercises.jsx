@@ -18,9 +18,8 @@ function compareStrings(a, b) {
 
 function Exercises(props) {
   const [exercises, setExercises] = useState([])
-  const [editingPopup, setEditingPopup] = useState(<></>)
-  const [isEditingExercise, setIsEditingExercise] = useState(false)
-  const [isAddingExercise, setIsAddingExercise] = useState(false)
+  const [popup, setPopup] = useState(<></>)
+  const [isPopupOpen, setIsPopupOpen] = useState(false)
   const [categories, setCategories] = useState([<span>All</span>])
   const [currentCategory, setCurrentCategory] = useState('All')
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false)
@@ -47,8 +46,19 @@ function Exercises(props) {
     })
   }, [setExercises, setCategories, props.userid])
 
-  // Add an exercise
-  const saveExercise = (exerciseID, name, picture, categories, weight, sets, reps) => {
+  // Open appropriate popup
+  const openPopup = (type, exerciseID, name, picture, categories) => {
+    if (type === 'add') {
+      setPopup(<LargePopup popup={'Exercise'} type={type} setIsPopupOpen={setIsPopupOpen} saveExercise={saveExercise} exerciseid={''} name={'Exercise'} picture={'https://firebasestorage.googleapis.com/v0/b/getfit-5d057.appspot.com/o/exercisePictures%2FDefault_Exercise.png?alt=media&token=3d89bc09-dfa0-4c5b-871f-a1a254e44ca7'} categories={categories} />)
+      setIsPopupOpen(true)
+    } else if (type === 'edit') {
+      setPopup(<LargePopup popup={'Exercise'} type={type} setIsPopupOpen={setIsPopupOpen} editExercise={editExercise} deleteExercise={deleteExercise} exerciseid={exerciseID} name={name} picture={picture} categories={categories} />)
+      setIsPopupOpen(true)
+    }
+  }
+
+  // Save new exercise
+  const saveExercise = (exerciseID, name, picture, categories) => {
     categories = formatCategories(categories)
     
     axios.post("http://localhost:3001/exercise/create", {
@@ -56,17 +66,14 @@ function Exercises(props) {
       "exerciseID": exerciseID,
       "name": name,
       "picture": picture,
-      "categories": categories,
-      "weight": weight,
-      "reps": reps, 
-      "sets": sets
+      "categories": categories
     }, {
       "content-type": "application/json"
     }).then(() => {
       axios.get("http://localhost:3001/exercises/get-all?userID="+props.userid).then(res => {
         setExercises(res.data)
         setCurrentCategory('All')
-        setIsAddingExercise(false)
+        setIsPopupOpen(false)
       }).then(() => {
         axios.get("http://localhost:3001/exercises/get-categories?userID="+props.userid).then(res => {
           let retCategories = [<span>All</span>] // Set default array
@@ -83,71 +90,40 @@ function Exercises(props) {
   }
 
   // Edit an exercise
-  const editExerciseClicked = (exerciseID, name, picture, categories, weight, sets, reps) => {
-    setEditingPopup(<LargePopup popup={'EditExercise'} setIsEditingExercise={setIsEditingExercise} editExercise={editExercise} deleteExercise={deleteExercise} exerciseid={exerciseID} name={name} picture={picture} categories={categories} weight={weight} sets={sets} reps={reps} />)
-    setIsEditingExercise(true)
-  }
-
-  const editExercise = (exerciseID, name, picture, categories, weight, sets, reps, isExerciseInfoChanged, isExerciseHistoryChanged) => {
+  const editExercise = (exerciseID, name, picture, categories) => {
+    console.log('editing '+exerciseID)
     categories = formatCategories(categories)
     
-    if (isExerciseInfoChanged) {
-      axios.put("http://localhost:3001/exercise/update-info", {
-        "exerciseID": exerciseID, 
-        "name": name,
-        "picture": picture,
-        "categories": categories
-      }, {
-        "content-type": "application/json"
+    axios.put("http://localhost:3001/exercise/update-info", {
+      "exerciseID": exerciseID, 
+      "name": name,
+      "picture": picture,
+      "categories": categories
+    }, {
+      "content-type": "application/json"
+    }).then(() => {
+      axios.get("http://localhost:3001/exercises/get-all?userID="+props.userid).then(res => {
+        setExercises(res.data)
+        setCurrentCategory('All')
+        setIsPopupOpen(false)
       }).then(() => {
-        axios.get("http://localhost:3001/exercises/get-all?userID="+props.userid).then(res => {
-          setExercises(res.data)
-          setCurrentCategory('All')
-        }).then(() => {
-          axios.get("http://localhost:3001/exercises/get-categories?userID="+props.userid).then(res => {
-            let retCategories = [<span>All</span>] // Set default array
-            if(res.data.length > 0) {
-              for (let i = 0; i < res.data.length; i++) {
-                res.data[i] = <span>{res.data[i]}</span> // Put the categories in the span tag
-              }
-              retCategories = retCategories.concat(res.data) // Merge the default and get results arrays
+        axios.get("http://localhost:3001/exercises/get-categories?userID="+props.userid).then(res => {
+          let retCategories = [<span>All</span>] // Set default array
+          if(res.data.length > 0) {
+            for (let i = 0; i < res.data.length; i++) {
+              res.data[i] = <span>{res.data[i]}</span> // Put the categories in the span tag
             }
-            setCategories(retCategories)
-          })
+            retCategories = retCategories.concat(res.data) // Merge the default and get results arrays
+          }
+          setCategories(retCategories)
         })
       })
-    }
-
-    if (isExerciseHistoryChanged) {
-      axios.post("http://localhost:3001/exercise/update-history", {
-        "exerciseID": exerciseID,
-        "weight": weight,
-        "reps": reps, 
-        "sets": sets
-      }, {
-        "content-type": "application/json"
-      }).then(() => {
-        axios.get("http://localhost:3001/exercises/get-all?userID="+props.userid).then(res => {
-          setExercises(res.data)
-          setCurrentCategory('All')
-        }).then(() => {
-          axios.get("http://localhost:3001/exercises/get-categories?userID="+props.userid).then(res => {
-            let retCategories = [<span>All</span>] // Set default array
-            if(res.data.length > 0) {
-              for (let i = 0; i < res.data.length; i++) {
-                retCategories.push(<span>{res.data[i]}</span>) // Put the categories in the span tag
-              }
-            }
-            setCategories(retCategories)
-          })
-        })
-      })
-    }
-    setIsEditingExercise(false)
+    })
   }
 
   // Format the categories array for postgres
   const formatCategories = (categories) => {
+    console.log(categories)
     let temp = '{'
     for (let i = 0; i < categories.length; i++) {
       temp += '"' +categories[i] + '"'
@@ -188,7 +164,7 @@ function Exercises(props) {
         }
       })
     })
-    setIsEditingExercise(false)
+    setIsPopupOpen(false)
   }
 
   // Display only exercises from selected category
@@ -228,8 +204,7 @@ function Exercises(props) {
 
   return (
     <div className="exercises-wrapper">
-      {isEditingExercise ? editingPopup : <></> }
-      {isAddingExercise ? <LargePopup popup={'AddExercise'} setIsAddingExercise={setIsAddingExercise} saveExercise={saveExercise} categories={categories} /> : <></>}
+      {isPopupOpen ? popup : <></> }
       <div className="exercises-top-container">
         <div className="categories-container">
           Category: <span onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}>{currentCategory} <i className="fa-solid fa-angle-down"></i></span>
@@ -244,7 +219,7 @@ function Exercises(props) {
         {exercises ? 
           exercises.map(exercise => {
             return (
-              <div className="exercise" key={exercise.exerciseid} onClick={() => editExerciseClicked(exercise.exerciseid, exercise.name, exercise.picture, exercise.categories, exercise.weight, exercise.sets, exercise.reps)}>
+              <div className="exercise" key={exercise.exerciseid} onClick={() => openPopup('edit', exercise.exerciseid, exercise.name, exercise.picture, exercise.categories)}>
                 <Exercise exerciseid={exercise.exerciseid} name={exercise.name} picture={exercise.picture} weight={exercise.weight} sets={exercise.sets} reps={exercise.reps} />
               </div>
             )
@@ -253,7 +228,7 @@ function Exercises(props) {
           <>Loading...</>
         }
       </div>
-      <AddButton onClick={() => setIsAddingExercise(true)} />
+      <AddButton onClick={() => openPopup('add', 0, '', '', [])} />
     </div>
   )
 }

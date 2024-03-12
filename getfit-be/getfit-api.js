@@ -359,7 +359,7 @@ app.post('/exercise/create', async (req, res) => {
     if(err) return rollback(client, res, "Error @: Beginning exercise creation -> "+err.message)
     client.query(`INSERT INTO Exercises (userID, exerciseID, name, picture, categories, createdDate) VALUES ('${user.userID}', '${user.exerciseID}', '${user.name}', '${user.picture}', '${user.categories}', '${date}');`, async(err, result) => {
       if(err) return rollback(client, res, "Error @: Inserting new exercise info -> "+err.message)
-      client.query(`INSERT INTO History (exerciseID, historyID, sets, reps, weight, changeDate) VALUES ('${user.exerciseID}', '${historyID}', ${user.sets}, ${user.reps}, ${user.weight}, '${date}');`, async (err, result) => {
+      client.query(`INSERT INTO History (exerciseID, historyID, sets, reps, weight, changeDate) VALUES ('${user.exerciseID}', '${historyID}', 0, 0, 0, '${date}');`, async (err, result) => {
         if(!err) { 
           logging(res, '', "Exercise created successfully", true)
           client.query('COMMIT')
@@ -424,7 +424,7 @@ app.get('/exercises/get-all', async (req, res) => {
     } else {
       logging(res, '', "Error @: Getting exercises of user -> "+err.message, false)
     } 
-  })
+  }) 
   client.end
 })
 

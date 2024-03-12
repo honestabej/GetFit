@@ -55,7 +55,7 @@
 }
 
 .exercise-name {
-  height: 30px;
+  height: 18px;
   width: calc(100% - 10px);
   margin-left: 10px;
   font-size: 17px;
@@ -63,9 +63,23 @@
   font-weight: 800;
 
   @media screen and (max-width: 400px) {
-    height: 20px;
+    height: 15px;
     font-size: 14px;
     font-weight: 700;
+  }
+}
+
+.exercise-text {
+  height: 13px;
+  width: calc(100% - 10px);
+  font-size: 13px;
+  font-weight: 650;
+  margin: 0px 0px 5px 10px;
+
+  @media screen and (max-width: 400px) {
+    height: 10px;
+    font-size: 10px;
+    font-weight: 600;
   }
 }
 
@@ -76,9 +90,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-sizing: border-box;
+  padding-top: 3px;
 
   @media screen and (max-width: 400px) {
-    height: calc(100% - 28px)
+    height: calc(100% - 30px)
   }
 }
 
@@ -87,7 +103,7 @@
   text-align: center;
 
   @media screen and (max-width: 400px) {
-    font-size: 14px;
+    font-size: 13px;
   }
 }
 

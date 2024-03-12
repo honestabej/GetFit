@@ -11,6 +11,7 @@ function Exercise(props) {
         </div>
         <div className="exercise-info-container">
           <div className="exercise-name">{props.name}</div>
+          <div className="exercise-text">Last Completed:</div>
           <div className="exercise-history-container">
             <div className="exercise-history">
               {props.weight} 

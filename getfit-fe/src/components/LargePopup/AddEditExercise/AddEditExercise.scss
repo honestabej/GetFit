@@ -1,12 +1,12 @@
 @import './../../../global.scss';
 
-.edit-exercise-wrapper {
+.add-edit-exercise-wrapper {
   box-sizing: border-box;
   padding: 15px;
   position: relative;
 }
 
-.edit-exercise-delete {
+.add-edit-exercise-delete {
   height: 30px;
   width: 30px;
   position: absolute;
@@ -27,12 +27,13 @@
   }
 }
 
-.edit-exercise-top-row {
+.add-edit-exercise-top-row {
   display: flex;
   align-items: flex-end;
+  margin-bottom: 15px;;
 }
 
-.edit-exercise-img-container {
+.add-edit-exercise-img-container {
   height: 100px;
   width: 100px;
   border: 2px solid lightgray;
@@ -43,19 +44,19 @@
   justify-content: center;
 }
 
-.edit-exercise-img-overlay {
+.add-edit-exercise-img-overlay {
   height: 100%;
   width: 100%;
   position: absolute;
   background: rgba($color: rgb(142, 141, 141), $alpha: 0.7);
 }
 
-.edit-exercise-img {
+.add-edit-exercise-img {
   min-width: 100%;
   object-fit: cover;
 }
 
-.edit-exercise-img-icon {
+.add-edit-exercise-img-icon {
   height: 100%;
   width: 100%;
   position: absolute;
@@ -80,59 +81,54 @@
   }
 }
 
-.edit-exercise-file-upload {
-
-}
-
-.edit-exercise-name-input {
-  height: 60px;
+.add-edit-inputs-container {
+  height: 100px;
   width: calc(100% - 110px);
   margin-left: 10px;
 }
 
-.edit-exercise-bottom-row {
+.add-edit-exercise-name-input {
   height: 60px;
   width: 100%;
-  margin-top: 15px;
-  display: flex;
-  justify-content: space-between;
+
+  &.edit {
+    width: calc(100% - 40px);
+  }
 }
 
-.edit-exercise-bottom-input {
-  height: 100%;
-  width: 30%;
-}
-
-.edit-exercise-category-container {
+.add-edit-exercise-category-container {
   height: 33px;
-  width: 80%;
-  margin: 15px auto;
+  width: 100%;
+  margin-top: -5px;
 }
 
-.edit-exercise-btns-container {
+.add-edit-exercise-btns-container {
   height: 40px;
   width: 100%;
-  margin-top: 15px;
   display: flex;
   justify-content: space-around;
 }
 
-.edit-exercise-btn {
+.add-edit-exercise-btn {
   height: 100%;
   width: 40%;
 }
 
-.edit-exercise-message {
+.add-edit-exercise-message {
   width: 100%;
   text-align: center;
-  margin-top: 20px;
   font-weight: 500;
+  display: none;
 
   &.error {
+    display: block;
+    margin-top: 15px;
     color: red;
   }
 
   &.saving {
+    display: block;
+    margin-top: 15px;
     color: green;
   }
 }
