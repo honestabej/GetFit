@@ -72,8 +72,8 @@ async function getCurrentDate() {
   const hour = currentDate.getHours()
   const minute = currentDate.getMinutes()
   const second = currentDate.getSeconds()
-  const changeDate = year+"-"+month+"-"+day+" "+hour+":"+minute+":"+second
-  return changeDate
+  const date = year+"-"+month+"-"+day+" "+hour+":"+minute+":"+second
+  return date
 }
 
 // Create User
@@ -359,7 +359,7 @@ app.post('/exercise/create', async (req, res) => {
     if(err) return rollback(client, res, "Error @: Beginning exercise creation -> "+err.message)
     client.query(`INSERT INTO Exercises (userID, exerciseID, name, picture, categories, createdDate) VALUES ('${user.userID}', '${user.exerciseID}', '${user.name}', '${user.picture}', '${user.categories}', '${date}');`, async(err, result) => {
       if(err) return rollback(client, res, "Error @: Inserting new exercise info -> "+err.message)
-      client.query(`INSERT INTO History (exerciseID, historyID, sets, reps, weight, changeDate) VALUES ('${user.exerciseID}', '${historyID}', 0, 0, 0, '${date}');`, async (err, result) => {
+      client.query(`INSERT INTO History (exerciseID, historyID, sets, reps, weight, completedDate) VALUES ('${user.exerciseID}', '${historyID}', 0, 0, 0, '${date}');`, async (err, result) => {
         if(!err) { 
           logging(res, '', "Exercise created successfully", true)
           client.query('COMMIT')
@@ -392,7 +392,7 @@ app.post('/exercise/update-history', async (req, res) => {
   let historyID = uuid()
   let currentDate = await getCurrentDate()
 
-  client.query(`INSERT INTO History (exerciseID, historyID, sets, reps, weight, changeDate) VALUES 
+  client.query(`INSERT INTO History (exerciseID, historyID, sets, reps, weight, completedDate) VALUES 
     ('${user.exerciseID}', '${historyID}', ${user.sets}, ${user.reps}, ${user.weight}, '${currentDate}');`, async (err, result) => {
     if (!err) {
       logging(res, '', "History info added successfully", true)
@@ -416,7 +416,7 @@ app.delete('/exercise/delete', async (req, res) => {
 
 // Get all Exercises of a User
 app.get('/exercises/get-all', async (req, res) => {
-  client.query(`WITH RecentHistory As (Select *, Row_Number() Over (Partition By exerciseID Order By changeDate Desc) RowNum From 
+  client.query(`WITH RecentHistory As (Select *, Row_Number() Over (Partition By exerciseID Order By completedDate Desc) RowNum From 
     (SELECT * FROM (SELECT * FROM Exercises WHERE userID = '${req.query.userID}') AS Temp1 JOIN History USING(exerciseID)) AS Temp2) 
     SELECT * FROM RecentHistory WHERE RowNum = 1;`, async (err, result) => {
     if (!err) {
@@ -430,7 +430,7 @@ app.get('/exercises/get-all', async (req, res) => {
 
 // Get all Exercises of a User with a specific Category
 app.get('/exercises/get-category', async (req, res) => {
-  client.query(`WITH RecentHistory As (Select *, Row_Number() Over (Partition By exerciseID Order By changeDate Desc) RowNum From 
+  client.query(`WITH RecentHistory As (Select *, Row_Number() Over (Partition By exerciseID Order By completedDate Desc) RowNum From 
     (SELECT * FROM (SELECT * FROM Exercises WHERE userID = '${req.query.userID}') AS Temp1 JOIN History USING(exerciseID)) AS Temp2) 
     SELECT * FROM RecentHistory WHERE RowNum = 1 AND '${req.query.category}' = ANY(categories);`, async (err, result) => {
     if (!err) {
@@ -516,8 +516,8 @@ app.get('/workout/get-all', async (req, res) => {
 
 // Get all Exercises of a User's Workout
 app.get('/workout/get-exercises', async (req, res) => {
-  client.query(`SELECT * FROM (SELECT exerciseID FROM WoEx WHERE workoutID = '${req.query.workoutID}') AS Temp1 JOIN (WITH RecentHistory As 
-    (Select *, Row_Number() Over (Partition By exerciseID Order By changeDate Desc) RowNum From (SELECT * FROM (SELECT * FROM Exercises 
+  client.query(`SELECT * FROM (SELECT exerciseID FROM Contains WHERE workoutID = '${req.query.workoutID}') AS Temp1 JOIN (WITH RecentHistory As 
+    (Select *, Row_Number() Over (Partition By exerciseID Order By completedDate Desc) RowNum From (SELECT * FROM (SELECT * FROM Exercises 
     WHERE userID = '${req.query.userID}') AS Temp2 JOIN History USING(exerciseID)) AS Temp3) SELECT * FROM RecentHistory WHERE RowNum = 1) 
     AS Temp4 USING(exerciseID);`, async (err, result) => {
     if (!err) {
@@ -533,7 +533,7 @@ app.get('/workout/get-exercises', async (req, res) => {
 app.post('/workout/add-exercise', async (req, res) => {
   let user = req.body
 
-  client.query(`INSERT INTO WoEx (workoutID, exerciseID) VALUES ('${user.workoutID}', '${user.exerciseID}');`, async (err, result) => {
+  client.query(`INSERT INTO Contains (workoutID, exerciseID) VALUES ('${user.workoutID}', '${user.exerciseID}');`, async (err, result) => {
     if (!err) {
       logging(res, '', "Exercise added to workout successfully", true)
     } else {
@@ -545,7 +545,7 @@ app.post('/workout/add-exercise', async (req, res) => {
 
 // Remove an Exercise from a Workout
 app.delete('/workout/delete-exercise', async (req, res) => {
-  client.query(`DELETE FROM WoEx WHERE workoutID = '${req.query.workoutID}' AND exerciseID = '${req.query.exerciseID}';`, async (err, result) => {
+  client.query(`DELETE FROM Contains WHERE workoutID = '${req.query.workoutID}' AND exerciseID = '${req.query.exerciseID}';`, async (err, result) => {
     if (!err) {
       logging(res, '', "Exercise deleted from workout successfully", true)
     } else {
@@ -557,7 +557,7 @@ app.delete('/workout/delete-exercise', async (req, res) => {
 
 // Test
 app.get('/test', (req, res) => {
-  client.query(`WITH RecentHistory As (Select *, Row_Number() Over (Partition By exerciseID Order By changeDate Desc) RowNum From 
+  client.query(`WITH RecentHistory As (Select *, Row_Number() Over (Partition By exerciseID Order By completedDate Desc) RowNum From 
     (SELECT * FROM (SELECT * FROM Exercises WHERE userID = '${req.query.userID}') AS Temp1 JOIN History USING(exerciseID)) AS Temp2) 
     SELECT * FROM RecentHistory WHERE RowNum = 1;`, async (err, result) => {
     if (!err) {

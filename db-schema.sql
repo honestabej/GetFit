@@ -45,13 +45,12 @@ CREATE TABLE History (
     sets INT,
     reps INT,
     weight FLOAT,
-    changeDate TIMESTAMP,
     completedDate TIMESTAMP,
     PRIMARY KEY(historyID),
     FOREIGN KEY(exerciseID) REFERENCES Exercises ON DELETE CASCADE
 );
 
-CREATE TABLE WoEx (
+CREATE TABLE Contains (
     workoutID VARCHAR(100),
     exerciseID VARCHAR(100),
     PRIMARY KEY (workoutID, exerciseID)

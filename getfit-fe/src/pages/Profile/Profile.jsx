@@ -124,7 +124,7 @@ function Profile(props) {
                 <ProfileButton onClick={signOut} icon={<i className="fa-solid fa-right-from-bracket icon"></i>} value={'Sign Out'} arrow={''} active={activeButton[3]} color={'red'} />
               </div>
               <div className="profile-button-container workout">
-                <WorkouButton onClick={() => window.location.href = '/workout'} value={'Workout Now'} />
+                <WorkouButton onClick={() => window.location.href = '/workouts'} value={'Workout Now'} />
               </div>
             </div>
           </div>

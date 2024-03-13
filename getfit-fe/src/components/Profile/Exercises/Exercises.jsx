@@ -193,7 +193,7 @@ function Exercises(props) {
       })
     } else if (method === 'Recently Updated') {
       exercises.sort(function(a, b){
-        return new Date(a.changedate) < new Date(b.changedate) ? 1 : -1
+        return new Date(a.completeddate) < new Date(b.completeddate) ? 1 : -1
       })
     } 
     // TODO: Implement recently completed sorting after completed feature is added
