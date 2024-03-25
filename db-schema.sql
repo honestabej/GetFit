@@ -1,125 +1,86 @@
 CREATE TABLE Users (
-    userID VARCHAR(100), 
-    userName VARCHAR(100), 
-    email VARCHAR(100), 
-    password VARCHAR(100), 
-    name VARCHAR(100), 
+    userid VARCHAR(100), 
+    name VARCHAR(50), 
+    username VARCHAR(50), 
+    email VARCHAR(50), 
+    password VARCHAR(30), 
     profilePicture VARCHAR(500), 
     age INT, 
-    PRIMARY KEY(userID)
+    PRIMARY KEY(userid)
 );
 
 CREATE TABLE Goals (
-    userID VARCHAR(100),
-    goalID VARCHAR(100),
+    userid VARCHAR(100),
+    goalid VARCHAR(100),
     goal FLOAT,
     weight FLOAT,
     goalDate TIMESTAMP,
     weightDate TIMESTAMP,
-    PRIMARY KEY(goalID),
-    FOREIGN KEY(userID) REFERENCES Users ON DELETE CASCADE
+    PRIMARY KEY(goalid),
+    FOREIGN KEY(userid) REFERENCES Users ON DELETE CASCADE
 );
 
 CREATE TABLE Workouts (
-    userID VARCHAR(100),
-    workoutID VARCHAR(100),
+    userid VARCHAR(100),
+    workoutid VARCHAR(100),
     name VARCHAR(100),
-    PRIMARY KEY(workoutID),
-    FOREIGN KEY(userID) REFERENCES Users ON DELETE CASCADE
+    PRIMARY KEY(workoutid),
+    FOREIGN KEY(userid) REFERENCES Users ON DELETE CASCADE
+);
+
+CREATE TABLE Contains (
+    workoutid VARCHAR(100),
+    exerciseid VARCHAR(100),
+    PRIMARY KEY(workoutid, exerciseid)
 );
 
 CREATE TABLE Exercises (
-    userID VARCHAR(100),
-    exerciseID VARCHAR(100),
+    userid VARCHAR(100),
+    exerciseid VARCHAR(100),
     name VARCHAR(100),
     picture VARCHAR(500),
     categories text[],
     createdDate TIMESTAMP,
-    PRIMARY KEY(exerciseID),
-    FOREIGN KEY(userID) REFERENCES Users ON DELETE CASCADE
+    PRIMARY KEY(exerciseid),
+    FOREIGN KEY(userid) REFERENCES Users ON DELETE CASCADE
 );
 
-CREATE TABLE History (
-    exerciseID VARCHAR(100),
-    historyID VARCHAR(100),
-    sets INT,
-    reps INT,
-    weight FLOAT,
+CREATE TABLE Weightlifting (
+    exerciseid VARCHAR(100),
+    weightliftingid VARCHAR(100),
+    difficulty FLOAT,
     completedDate TIMESTAMP,
-    PRIMARY KEY(historyID),
-    FOREIGN KEY(exerciseID) REFERENCES Exercises ON DELETE CASCADE
+    PRIMARY KEY(weightliftingid),
+    FOREIGN KEY(exerciseid) REFERENCES Exercises ON DELETE CASCADE
 );
 
-CREATE TABLE Contains (
-    workoutID VARCHAR(100),
-    exerciseID VARCHAR(100),
-    PRIMARY KEY (workoutID, exerciseID)
+CREATE TABLE Sets (
+    weightliftingid VARCHAR(100),
+    setid VARCHAR(100),
+    weight FLOAT,
+    reps INT,
+    PRIMARY KEY(setid),
+    FOREIGN KEY(weightliftingid) REFERENCES Weightlifting ON DELETE CASCADE
 );
 
-INSERT INTO Users (userID, userName, email, password, name, age) VALUES
-    ('u1', 'honestabej', 'honestabej@hotmail.com', 'password', 'Abe', 24);
+CREATE TABLE Cardio (
+    exerciseid VARCHAR(100),
+    cardioid VARCHAR(100),
+    time TIME,
+    distance FLOAT,
+    completedDate TIMESTAMP,
+    PRIMARY KEY(cardioid),
+    FOREIGN KEY(exerciseid) REFERENCES Exercises ON DELETE CASCADE
+);
 
-INSERT INTO Goals (userID, goalID, goal, weight, goalDate, weightDate) VALUES
-    ('u1', 'g1', 180.00, 185.00, '2023-11-27 14:55:46', '2023-11-27 14:55:46'),
-    ('u1', 'g2', 181.00, 186.00, '2022-11-28 09:00:32', '2023-11-28 09:00:32'),
-    ('u1', 'g3', 182.00, 187.00, '2023-11-28 20:50:01', '2023-11-28 20:50:01');
-
-INSERT INTO Workouts (userID, workoutID, name) VALUES
-    ('u1', 'w1', 'Day 1'),
-    ('u1', 'w2', 'Day 2'),
-    ('u1', 'w3', 'Day 3'),
-    ('u1', 'w4', 'Day 4');
-
-INSERT INTO Exercises (userID, exerciseID, name, category) VALUES
-    ('u1', 'e1', 'Sit Up', 'Core'),
-    ('u1', 'e2', 'Bicep Curl', 'Arms'),
-    ('u1', 'e3', 'Chest Press', 'Upper'),
-    ('u1', 'e4', 'Shoulder Press', 'Upper'),
-    ('u1', 'e5', 'Tricep Pushdown', 'Arms'),
-    ('u1', 'e6', 'Leg Press', 'Legs'),
-    ('u1', 'e7', 'Calf Raise', 'Core'),
-    ('u1', 'e8', 'Assisted Pull Up', 'Back'),
-    ('u1', 'e9', 'Lat Pulldown', 'Back'),
-    ('u1', 'e10', 'Leg Extension', 'Legs');
-
-INSERT INTO History (exerciseID, historyID, sets, reps, weight, changeDate) VALUES
-    ('e1', 'h1', 3, 25, 0.0, '2023-11-27 14:55:46'),
-    ('e2', 'h2', 3, 8, 80.0, '2023-11-27 14:55:46'),
-    ('e3', 'h3', 4, 10, 115.0, '2023-11-27 14:55:46'),
-    ('e4', 'h4', 3, 8, 80.0, '2023-11-27 14:55:46'),
-    ('e5', 'h5', 3, 12, 37.5, '2023-11-27 14:55:46'),
-    ('e6', 'h6', 4, 12, 250.0, '2023-11-27 14:55:46'),
-    ('e7', 'h7', 4, 15, 250.0, '2023-11-27 14:55:46'),
-    ('e8', 'h8', 3, 8, -70.0, '2023-11-27 14:55:46'),
-    ('e9', 'h9', 3, 8, 90.0, '2023-11-27 14:55:46'),
-    ('e10', 'h10', 3, 12, 110.0, '2023-11-27 14:55:46'),
-    ('e1', 'h11', 4, 26, 0.0, '2023-11-28 14:55:46');
-
-INSERT INTO WoEx (workoutID, exerciseID) VALUES
-    ('w1', 'e1'),
-    ('w1', 'e2'),
-    ('w1', 'e3'),
-    ('w1', 'e4'),
-    ('w1', 'e5'),
-    ('w1', 'e6'),
-    ('w2', 'e4'),
-    ('w2', 'e5'),
-    ('w2', 'e6'),
-    ('w2', 'e7'),
-    ('w2', 'e8'),
-    ('w2', 'e9'),
-    ('w3', 'e10'),
-    ('w3', 'e1'),
-    ('w3', 'e2'),
-    ('w3', 'e3'),
-    ('w3', 'e4'),
-    ('w3', 'e5'),
-    ('w4', 'e6'),
-    ('w4', 'e7'),
-    ('w4', 'e8'),
-    ('w4', 'e9'),
-    ('w4', 'e10'),
-    ('w4', 'e1');
+CREATE TABLE Other (
+    exerciseid VARCHAR(100),
+    otherid VARCHAR(100),
+    notes VARCHAR(10000),
+    completedDate TIMESTAMP,
+    PRIMARY KEY(otherid),
+    FOREIGN KEY(exerciseid) REFERENCES Exercises ON DELETE CASCADE
+);
 
 -- If DB reset is needed... ALL DATA WILL BE LOST --
 DROP SCHEMA public CASCADE;
@@ -127,61 +88,263 @@ CREATE SCHEMA public;
 
 -- Queries Below --
 
--- Add user
-INSERT INTO Users (userID, userName, email, password, name, age) VALUES ('${userID}', '${user.userName}', '${user.email}', '${hashedPwd}', '${user.name}', ${user.age}); -- Picture to come later
-INSERT INTO Goals (userID, goalID, goal, weight, goalDate, weightDate) VALUES ('${userID}', '${goalID}', ${user.goal}, ${user.weight}, '${user.goalDate}', '${user.weightDate}');
+-- Create User
+    -- Insert User info into the User table
+    INSERT INTO Users (userid, name, username, email, password, profilePicture, age) VALUES ('${}', '${}', '${}', '${}', '${}', '${}', ${}); 
+    -- Insert Goals info into the Goals table
+    INSERT INTO Goals (userid, goalid, goal, weight, goalDate, weightDate) VALUES ('${}', '${}', ${}, ${}, '${}', '${}');
 
--- Get userID and password from email (for logging in)
-SELECT userID, password FROM Users WHERE email = '${user.email}';
+-- Edit User info (not password)
+UPDATE Users SET name = '${}', age = ${}, email = '${}', profilePicture = '${}' WHERE userid = '${}';
+    
+-- Edit User password
+UPDATE Users SET password = '${}' WHERE userid = '${}';
 
--- Get a user's current weight
-SELECT weight, weightDate FROM Goals WHERE userID = '${user.userID}' AND weight IS NOT NULL ORDER BY weightDate DESC LIMIT 1;
+-- Update User's Goals info
+INSERT INTO Goals (userid, goalid, goal, weight, goalDate, weightDate) VALUES ('', '', ${}, ${}, '${}', '${}');
 
--- Get a user's current goal
-SELECT goal, goalDate FROM Goals WHERE userID = '${user.userID}' AND goal IS NOT NULL ORDER BY goalDate DESC LIMIT 1;
+-- Get User info (w/o password)
+SELECT userid, email, age, name, profilePicture FROM Users WHERE userid = '${}';
 
--- Update user info (and weight/goal)
-    UPDATE Users SET name = '${user.name}', age = ${user.age}, email = '${user.email}' WHERE userID = '${user.userID}'; -- Picture to come later
-    -- If updating either weight OR goal
-    INSERT INTO Goals (userID, goalID, goal, weight, goalDate, weightDate) VALUES ('${user.userID}', '${goalID}', ${user.goal}, ${user.weight}, '${user.goalDate}', '${user.weightDate}');
+-- Get User id and password for login
+SELECT userid, password FROM Users WHERE email = '${}' OR username = '${}';
 
--- Update user password
-UPDATE Users SET password = '${user.password}' WHERE userID = '${user.userID}';
+-- Get User weight
+SELECT weight, weightDate FROM Goals WHERE userid = '${}' AND weight IS NOT NULL ORDER BY weightDate DESC LIMIT 1;
 
--- Add an exercise
-INSERT INTO Exercises (userID, exerciseID, name, category) VALUES ('${user.userID}', '${exerciseID}', '${user.name}', '${user.category}');
-INSERT INTO History (exerciseID, historyID, sets, reps, weight, changeDate) VALUES ('${exerciseID}', '${historyID}', ${user.sets}, ${user.reps}, ${user.weight}, '${changeDate}'); -- completedDate to come later
+-- Get User goal
+SELECT goal, goalDate FROM Goals WHERE userid = '${}' AND goal IS NOT NULL ORDER BY goalDate DESC LIMIT 1;
 
--- Update an exercise
-    UPDATE Exercises SET name = '${user.name}', category = '${user.category}' WHERE exerciseID = '${user.exerciseID}';
-    -- If any of this info has changed
-    INSERT INTO History (exerciseID, historyID, sets, reps, weight, changeDate) VALUES ('${user.exerciseID}', '${historyID}', ${user.sets}, ${user.reps}, ${user.weight}, '${changeDate}'); -- completedDate to come later
+-- Create an Exercise
+INSERT INTO Exercises (userid, exerciseid, name, picture, categories, type, createdDate) VALUES ('${}', '${}', '${}', '${}', '${}', '${}', '${}');
+
+-- Edit an Exercise
+UPDATE Exercises SET name = '${}', picture = '${}', categories = '${}' WHERE exerciseid = '${}';
 
 -- Delete an exercise
-DELETE FROM Exercises WHERE exerciseID = '${user.exerciseID}';
+DELETE FROM Exercises WHERE exerciseid = '${}';
 
--- Get an exercise with it's most recent history
+-- Get all Exercises and their most recent completed info: (must run separate queries for each type)
+    -- Get all Weightlifting Exercises of a User (with all sets of most recent completion)
+    SELECT * FROM (
+ 	    WITH RecentHistory AS (
+            Select *, Row_Number() Over (
+                Partition By exerciseid Order By completedDate Desc
+            ) RowNum From (
+                SELECT * FROM (
+                    SELECT * FROM Exercises WHERE userid = '${}'
+                ) AS Temp1 JOIN Weightlifting USING(exerciseid)
+            ) AS Temp2
+        ) SELECT * FROM RecentHistory WHERE RowNum = 1
+    ) AS Temp3 JOIN Sets Using(weightliftingid);
 
--- Get all exercises of a user with most recent history
-WITH RecentHistory As (Select *, Row_Number() Over (Partition By exerciseID Order By changeDate Desc) RowNum From (SELECT * FROM (SELECT * FROM Exercises WHERE userID = '${user.userID}') AS Temp1 JOIN History USING(exerciseID)) AS Temp2) SELECT * FROM RecentHistory WHERE RowNum = 1;
+    -- Get all Cardio Exercises of a User (with most recent completion)
+    WITH RecentHistory AS (
+        Select *, Row_Number() Over (
+            Partition By exerciseid Order By completedDate Desc
+        ) RowNum From (
+            SELECT * FROM (
+                SELECT * FROM Exercises WHERE userid = '${}'
+            ) AS Temp1 JOIN Cardio USING(exerciseid)
+        ) AS Temp2
+    ) SELECT * FROM RecentHistory WHERE RowNum = 1;
 
--- Get all exercises of a user with most recent history in a specific category
-WITH RecentHistory As (Select *, Row_Number() Over (Partition By exerciseID Order By changeDate Desc) RowNum From (SELECT * FROM (SELECT * FROM Exercises WHERE userID = '${user.userID}') AS Temp1 JOIN History USING(exerciseID)) AS Temp2) SELECT * FROM RecentHistory WHERE RowNum = 1 AND category = '${user.category}';
+    -- Get all Other Exercises of a User (with most recent completion)
+    WITH RecentHistory AS (
+        Select *, Row_Number() Over (
+            Partition By exerciseid Order By completedDate Desc
+        ) RowNum From (
+            SELECT * FROM (
+                SELECT * FROM Exercises WHERE userid = '${}'
+            ) AS Temp1 JOIN Other USING(exerciseid)
+        ) AS Temp2
+    ) SELECT * FROM RecentHistory WHERE RowNum = 1;
+
+-- Get all Exercises of a specific category and their most recent completed info: (must run separate queries for each type)
+    -- Get all Weightlifting Exercises and most recently completed sets with a specific category
+    SELECT * FROM (
+        WITH RecentHistory AS (
+            Select *, Row_Number() Over (
+                Partition By exerciseid Order By completedDate Desc
+            ) RowNum From (
+                SELECT * FROM (
+                    SELECT * FROM Exercises WHERE userid = '${}' AND '${}' = ANY(categories)
+                ) AS Temp1 JOIN Weightlifting USING(exerciseid)
+            ) AS Temp2
+        ) SELECT * FROM RecentHistory WHERE RowNum = 1
+    ) AS Temp3 JOIN Sets Using(weightliftingid);
+
+    -- Get all Cardio Exercises with a specific category
+    WITH RecentHistory AS (
+        Select *, Row_Number() Over (
+            Partition By exerciseid Order By completedDate Desc
+        ) RowNum From (
+            SELECT * FROM (
+                SELECT * FROM Exercises WHERE userid = '${}' AND '${}' = ANY(categories)
+            ) AS Temp1 JOIN Cardio USING(exerciseid)
+        ) AS Temp2
+    ) SELECT * FROM RecentHistory WHERE RowNum = 1;
+
+    -- Get all Other Exercises with a specific category
+    WITH RecentHistory AS (
+        Select *, Row_Number() Over (
+            Partition By exerciseid Order By completedDate Desc
+        ) RowNum From (
+            SELECT * FROM (
+                SELECT * FROM Exercises WHERE userid = '${}' AND '${}' = ANY(categories)
+            ) AS Temp1 JOIN Other USING(exerciseid)
+        ) AS Temp2
+    ) SELECT * FROM RecentHistory WHERE RowNum = 1;
+
+-- Create a completion of a Weightlifting Exercise
+    -- Create a Weightlifting entry
+    INSERT INTO Weightlifting (exerciseid, weightliftingid, difficulty, completedDate) VALUES ('${}', '${}', ${}, '${}');
+    
+    -- Create a set (Insert multiple entries for multiple sets)
+    INSERT INTO Sets (workoutid, setid, weight, reps) VALUES ('${}', '${}', '${}', '${}');
+
+-- Edit a set completion of a Weightlifting Exercise
+UPDATE Sets SET weight = '${}', reps = '${}' WHERE setid = '${}';
+
+-- Delete a completion of a Weightlifting Exercise
+DELETE FROM Weightlifting WHERE exerciseid = '${}';
+
+-- Delete a set completion of a Weightlifting Exercise
+DELETE FROM Sets WHERE setid = '${}';
+
+-- Create a completion of a Cardio Exercise
+INSERT INTO Cardio (exerciseid, cardioid, time, distance, completedDate) VALUES ('${}', '${}', '${}', '${}', '${}');
+
+-- Edit a completion of a Cardio Exercise
+UPDATE Cardio SET time = '${}', distance = '${}' WHERE cardioid = '${}';
+
+-- Delete a completion of a Cardio Exercise
+DELETE FROM Cardio WHERE cardioid = '${}';
+
+-- Create a completion of an Other Exercise
+INSERT INTO Other (exerciseid, otherid, notes, completedDate) VALUES ('${}', '${}', '${}', '${}');
+
+-- Edit a completion of an Other Exercise
+UPDATE Other SET notes = '${}' WHERE otherid = '${}';
+
+-- Delete a completion of an Other Exercise
+DELETE FROM Other WHERE otherid = '${}';
 
 -- Add a workout
-INSERT INTO Workouts (userID, workoutID, name) VALUES ('${user.userID}', '${workoutID}', '${user.name}');
+INSERT INTO Workouts (userid, workoutid, name) VALUES ('${}', '${}', '${}');
+
+-- Edit a workout
+UPDATE Workouts SET name = '${}' WHERE wokroutid = '${}';
 
 -- Delete a workout
-DELETE FROM Workouts WHERE workoutID = '${user.workoutID}';
+DELETE FROM Workouts WHERE workoutid = '${}';
 
 -- Get all workouts of a user
-SELECT * FROM Workouts WHERE userID = '${user.userID}';
+SELECT * FROM Workouts WHERE userid = '${}';
 
 -- Add an exercise to a workout
-INSERT INTO WoEx (workoutID, exerciseID) VALUES ('${user.workoutID}', '${user.exerciseID}');
+INSERT INTO Contains (workoutid, exerciseid) VALUES ('${}', '${}');
 
 -- Remove an exercise from a workout
-DELETE FROM WoEx WHERE workoutID = '${user.workoutID}' AND exerciseID = '${user.exerciseID}';
+DELETE FROM Contains WHERE workoutid = '${}' AND exerciseid = '${}';
 
--- Get all exercises of a user's workout
-SELECT * FROM (SELECT exerciseID FROM WoEx WHERE workoutID = '${user.workoutID}') AS Temp1 JOIN (WITH RecentHistory As (Select *, Row_Number() Over (Partition By exerciseID Order By changeDate Desc) RowNum From (SELECT * FROM (SELECT * FROM Exercises WHERE userID = '${user.userID}') AS Temp2 JOIN History USING(exerciseID)) AS Temp3) SELECT * FROM RecentHistory WHERE RowNum = 1) AS Temp4 USING(exerciseID);
+-- Get all Exercises of a workout
+    -- Get all Weightlifting Exercises of a Workout
+    SELECT * FROM (
+        SELECT exerciseid FROM Contains WHERE workoutid = '${}'
+    ) AS Temp1 JOIN (
+        SELECT * FROM (
+            WITH RecentHistory AS (
+                Select *, Row_Number() Over (
+                    Partition By exerciseid Order By completedDate Desc
+                ) RowNum From (
+                    SELECT * FROM (
+                        SELECT * FROM Exercises WHERE userid = '${}'
+                    ) AS Temp2 JOIN Weightlifting USING(exerciseid)
+                ) AS Temp3
+            ) SELECT * FROM RecentHistory WHERE RowNum = 1
+        ) AS Temp4 JOIN Sets Using(weightliftingid)
+    ) AS Temp5 USING(exerciseid);
+
+    -- Get all Cardio Exercises of a Workout
+    SELECT * FROM (
+        SELECT exerciseid FROM Contains WHERE workoutid = '${}'
+    ) AS Temp1 JOIN (
+        WITH RecentHistory AS (
+            Select *, Row_Number() Over (
+                Partition By exerciseid Order By completedDate Desc
+            ) RowNum From (
+                SELECT * FROM (
+                    SELECT * FROM Exercises WHERE userid = '${}'
+                ) AS Temp2 JOIN Cardio USING(exerciseid)
+            ) AS Temp3
+        ) SELECT * FROM RecentHistory WHERE RowNum = 1
+    ) AS Temp4 USING(exerciseid);
+
+    -- Get all Other Exercises of a Workout
+    SELECT * FROM (
+        SELECT exerciseid FROM Contains WHERE workoutid = '${}'
+    ) AS Temp1 JOIN (
+        WITH RecentHistory AS (
+            Select *, Row_Number() Over (
+                Partition By exerciseid Order By completedDate Desc
+            ) RowNum From (
+                SELECT * FROM (
+                    SELECT * FROM Exercises WHERE userid = '${}'
+                ) AS Temp2 JOIN Other USING(exerciseid)
+            ) AS Temp3
+        ) SELECT * FROM RecentHistory WHERE RowNum = 1
+    ) AS Temp4 USING(exerciseid);
+
+
+-- TEMP INFO FOR TESTING QUERIES
+INSERT INTO Users (userid) VALUES ('u1'), ('u2');
+INSERT INTO Exercises (exerciseid, userid, name, categories) VALUES 
+    ('e1', 'u1', 'weight1', '{weight1}'),
+    ('e2', 'u1', 'weight2', '{weight1, weight2}'),
+    ('e3', 'u1', 'cardio1', '{cardio1}'),
+    ('e4', 'u1', 'cardio2', '{cardio1, cardio2}'),
+    ('e5', 'u1', 'other1', '{other1}'),
+    ('e6', 'u1', 'other2', '{other1, other2}'),
+    ('e7', 'u2', '2weight1', '{2weight1}'),
+    ('e8', 'u2', '2weight2', '{2weight1, 2weight2}'),
+    ('e9', 'u2', '2cardio1', '{2cardio1}'),
+    ('e10', 'u2', '2cardio2', '{2cardio1, 2cardio2}'),
+    ('e11', 'u2', '2other1', '{2other1}'),
+    ('e12', 'u2', '2other2', '{2other1, 2other2}');
+INSERT INTO Weightlifting (exerciseid, weightliftingid, completedDate) VALUES 
+    ('e1', 'w1', '2024-03-15 16:21:37'),
+    ('e1', 'w2', '2024-03-16 16:21:37')
+    ('e2', 'w3', '2024-03-15 16:21:37'),
+    ('e7', 'w4', '2024-03-15 16:21:37'),
+    ('e8', 'w5', '2024-03-15 16:21:37');
+INSERT INTO Sets (weightliftingid, setid, weight, reps) VALUES 
+    ('w1', 's1', 24, 8),
+    ('w2', 's2', 8, 24),
+    ('w2', 's3', 13, 10),
+    ('w3', 's4', 34, 12),
+    ('w4', 's5', 64, 30),
+    ('w5', 's6', 23, 1),
+    ('w5', 's7', 10, 6);
+INSERT INTO Cardio (exerciseid, cardioid, time, completedDate) VALUES 
+    ('e3', 'c1', '01:20:00', '2024-03-15 16:21:37'),
+    ('e3', 'c2', '02:00:00', '2024-03-16 16:21:37'),
+    ('e4', 'c3', '02:00:00', '2024-03-16 16:21:37'),
+    ('e9', 'c4', '01:20:00', '2024-03-15 16:21:37'),
+    ('e10', 'c5', '01:20:00', '2024-03-15 16:21:37');
+INSERT INTO Other (exerciseid, otherid, completedDate) VALUES
+    ('e5', 'o1', '2024-03-15 16:21:37'),
+    ('e5', 'o2', '2024-03-16 16:21:37'),
+    ('e6', 'o3', '2024-03-15 16:21:37'),
+    ('e6', 'o4', '2024-03-16 16:21:37'),
+    ('e6', 'o5', '2024-03-17 16:21:37'),
+    ('e11', 'o6', '2024-03-15 16:21:37'),
+    ('e12', 'o7', '2024-03-15 16:21:37');
+INSERT INTO Workouts (userid, workoutid) VALUES 
+    ('u1', 'wo1'),
+    ('u2', 'wo2');
+INSERT INTO Contains (workoutid, exerciseid) VALUES 
+    ('wo1', 'e1'),
+    ('wo1', 'e3'),
+    ('wo1', 'e5'),
+    ('wo2', 'e11');
