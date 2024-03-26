@@ -1,10 +1,10 @@
 ### Create User (VERIFIED WORKING)
-POST http://localhost:3001/users/create
+POST http://localhost:3001/user/create
 Content-Type: application/json
 
 {
-  "username": "test1",
-  "email": "test1@gmail.com",
+  "username": "hnesej",
+  "email": "hontabej@hotil.com",
   "password": "password",
   "name": "test1",
   "picture": null,
@@ -12,11 +12,11 @@ Content-Type: application/json
 }
 
 ### User login (VERIFIED WORKING)
-POST http://localhost:3001/users/login
+POST http://localhost:3001/user/login
 Content-Type: application/json
 
 {
-  "emailUsername": "test1@gmail.com",
+  "emailUsername": "hontabej@hotil.com",
   "password": "password"
 }
 
@@ -105,7 +105,7 @@ Content-Type: application/json
 }
 
 ### Get all Exercises of a User (VERIFIED WORKING)
-GET http://localhost:3001/exercise/get-all
+GET http://localhost:3001/exercise/get-all?userid=u1
 Content-Type: application/json
 
 {
@@ -113,7 +113,7 @@ Content-Type: application/json
 }
 
 ### Get all Exercises of a User with a specific Category (VERIFIED WORKING)
-GET http://localhost:3001/exercise/get-category
+GET http://localhost:3001/exercise/get-category?userid=u1&category=cardio1
 Content-Type: application/json
 
 {
@@ -174,9 +174,11 @@ Content-Type: application/json
 }
 
 ### Test
-POST http://localhost:3001/test-login
+POST http://localhost:3001/weightlifting/create
 Content-Type: application/json
 
 {
-  "userID": "u1"
+  "exerciseid": "e1",
+  "difficulty": "9",
+  "sets": [{"weight": 24, "reps": 8}, {"weight": 24, "reps": 8}, {"weight": 24, "reps": 8}]
 }

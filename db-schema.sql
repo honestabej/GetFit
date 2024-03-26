@@ -90,7 +90,7 @@ CREATE SCHEMA public;
 
 -- Create User
     -- Insert User info into the User table
-    INSERT INTO Users (userid, name, username, email, password, profilePicture, age) VALUES ('${}', '${}', '${}', '${}', '${}', '${}', ${}); 
+    INSERT INTO Users (userid, username, email, password, name, age, profilePicture) VALUES ('${}', '${}', '${}', '${}', '${}', '${}', ${}); 
     -- Insert Goals info into the Goals table
     INSERT INTO Goals (userid, goalid, goal, weight, goalDate, weightDate) VALUES ('${}', '${}', ${}, ${}, '${}', '${}');
 
@@ -100,8 +100,11 @@ UPDATE Users SET name = '${}', age = ${}, email = '${}', profilePicture = '${}' 
 -- Edit User password
 UPDATE Users SET password = '${}' WHERE userid = '${}';
 
+-- Update User's Weight info
+INSERT INTO Goals (userID, goalid, weight, weightDate) VALUES ('${}', '${}', ${}, '${}');
+
 -- Update User's Goals info
-INSERT INTO Goals (userid, goalid, goal, weight, goalDate, weightDate) VALUES ('', '', ${}, ${}, '${}', '${}');
+INSERT INTO Goals (userid, goalid, goal, goalDate) VALUES ('${}', '${}', ${}, '${}');
 
 -- Get User info (w/o password)
 SELECT userid, email, age, name, profilePicture FROM Users WHERE userid = '${}';
@@ -125,18 +128,16 @@ UPDATE Exercises SET name = '${}', picture = '${}', categories = '${}' WHERE exe
 DELETE FROM Exercises WHERE exerciseid = '${}';
 
 -- Get all Exercises and their most recent completed info: (must run separate queries for each type)
-    -- Get all Weightlifting Exercises of a User (with all sets of most recent completion)
-    SELECT * FROM (
- 	    WITH RecentHistory AS (
-            Select *, Row_Number() Over (
-                Partition By exerciseid Order By completedDate Desc
-            ) RowNum From (
-                SELECT * FROM (
-                    SELECT * FROM Exercises WHERE userid = '${}'
-                ) AS Temp1 JOIN Weightlifting USING(exerciseid)
-            ) AS Temp2
-        ) SELECT * FROM RecentHistory WHERE RowNum = 1
-    ) AS Temp3 JOIN Sets Using(weightliftingid);
+    -- Get all Weightlifting Exercises of a User (with most recent completion)
+    WITH RecentHistory AS (
+        Select *, Row_Number() Over (
+            Partition By exerciseid Order By completedDate Desc
+        ) RowNum From (
+            SELECT * FROM (
+                SELECT * FROM Exercises WHERE userid = '${}'
+            ) AS Temp1 JOIN Weightlifting USING(exerciseid)
+        ) AS Temp2
+    ) SELECT * FROM RecentHistory WHERE RowNum = 1;
 
     -- Get all Cardio Exercises of a User (with most recent completion)
     WITH RecentHistory AS (
@@ -162,17 +163,15 @@ DELETE FROM Exercises WHERE exerciseid = '${}';
 
 -- Get all Exercises of a specific category and their most recent completed info: (must run separate queries for each type)
     -- Get all Weightlifting Exercises and most recently completed sets with a specific category
-    SELECT * FROM (
-        WITH RecentHistory AS (
-            Select *, Row_Number() Over (
-                Partition By exerciseid Order By completedDate Desc
-            ) RowNum From (
-                SELECT * FROM (
-                    SELECT * FROM Exercises WHERE userid = '${}' AND '${}' = ANY(categories)
-                ) AS Temp1 JOIN Weightlifting USING(exerciseid)
-            ) AS Temp2
-        ) SELECT * FROM RecentHistory WHERE RowNum = 1
-    ) AS Temp3 JOIN Sets Using(weightliftingid);
+    WITH RecentHistory AS (
+        Select *, Row_Number() Over (
+            Partition By exerciseid Order By completedDate Desc
+        ) RowNum From (
+            SELECT * FROM (
+                SELECT * FROM Exercises WHERE userid = '${}' AND '${}' = ANY(categories)
+            ) AS Temp1 JOIN Weightlifting USING(exerciseid)
+        ) AS Temp2
+    ) SELECT * FROM RecentHistory WHERE RowNum = 1;
 
     -- Get all Cardio Exercises with a specific category
     WITH RecentHistory AS (
@@ -201,19 +200,22 @@ DELETE FROM Exercises WHERE exerciseid = '${}';
     INSERT INTO Weightlifting (exerciseid, weightliftingid, difficulty, completedDate) VALUES ('${}', '${}', ${}, '${}');
     
     -- Create a set (Insert multiple entries for multiple sets)
-    INSERT INTO Sets (workoutid, setid, weight, reps) VALUES ('${}', '${}', '${}', '${}');
-
--- Edit a set completion of a Weightlifting Exercise
-UPDATE Sets SET weight = '${}', reps = '${}' WHERE setid = '${}';
+    INSERT INTO Sets (weightliftingid, setid, weight, reps) VALUES ('${}', '${}', ${}, ${});
 
 -- Delete a completion of a Weightlifting Exercise
-DELETE FROM Weightlifting WHERE exerciseid = '${}';
+DELETE FROM Weightlifting WHERE weightliftingid = '${}';
 
--- Delete a set completion of a Weightlifting Exercise
+-- Edit a Set completion of a Weightlifting Exercise
+UPDATE Sets SET weight = '${}', reps = '${}' WHERE setid = '${}';
+
+-- Delete a Set completion of a Weightlifting Exercise
 DELETE FROM Sets WHERE setid = '${}';
 
+-- Get all Set completions of a Workout
+SELECT setid, weight, reps FROM Sets WHERE weightliftingid = '${}';
+
 -- Create a completion of a Cardio Exercise
-INSERT INTO Cardio (exerciseid, cardioid, time, distance, completedDate) VALUES ('${}', '${}', '${}', '${}', '${}');
+INSERT INTO Cardio (exerciseid, cardioid, time, distance, completedDate) VALUES ('${}', '${}', '${}', ${}, '${}');
 
 -- Edit a completion of a Cardio Exercise
 UPDATE Cardio SET time = '${}', distance = '${}' WHERE cardioid = '${}';
@@ -234,7 +236,7 @@ DELETE FROM Other WHERE otherid = '${}';
 INSERT INTO Workouts (userid, workoutid, name) VALUES ('${}', '${}', '${}');
 
 -- Edit a workout
-UPDATE Workouts SET name = '${}' WHERE wokroutid = '${}';
+UPDATE Workouts SET name = '${}' WHERE workoutid = '${}';
 
 -- Delete a workout
 DELETE FROM Workouts WHERE workoutid = '${}';
@@ -314,7 +316,7 @@ INSERT INTO Exercises (exerciseid, userid, name, categories) VALUES
     ('e12', 'u2', '2other2', '{2other1, 2other2}');
 INSERT INTO Weightlifting (exerciseid, weightliftingid, completedDate) VALUES 
     ('e1', 'w1', '2024-03-15 16:21:37'),
-    ('e1', 'w2', '2024-03-16 16:21:37')
+    ('e1', 'w2', '2024-03-16 16:21:37'),
     ('e2', 'w3', '2024-03-15 16:21:37'),
     ('e7', 'w4', '2024-03-15 16:21:37'),
     ('e8', 'w5', '2024-03-15 16:21:37');
