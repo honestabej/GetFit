@@ -28,10 +28,12 @@ CREATE TABLE Workouts (
     FOREIGN KEY(userid) REFERENCES Users ON DELETE CASCADE
 );
 
-CREATE TABLE Contains (
+CREATE TABLE Groups (
     workoutid VARCHAR(100),
-    exerciseid VARCHAR(100),
-    PRIMARY KEY(workoutid, exerciseid)
+    groupid VARCHAR(100),
+    name VARCHAR(100),
+    PRIMARY KEY(groupid),
+    FOREIGN KEY(workoutid) REFERENCES Workouts ON DELETE CASCADE
 );
 
 CREATE TABLE Exercises (
@@ -43,6 +45,13 @@ CREATE TABLE Exercises (
     createdDate TIMESTAMP,
     PRIMARY KEY(exerciseid),
     FOREIGN KEY(userid) REFERENCES Users ON DELETE CASCADE
+);
+
+CREATE TABLE Contains (
+    groupid VARCHAR(100),
+    exerciseid VARCHAR(100),
+    FOREIGN KEY(groupid) REFERENCES Groups ON DELETE CASCADE,
+    FOREIGN KEY(exerciseid) REFERENCES Exercises ON DELETE CASCADE
 );
 
 CREATE TABLE Weightlifting (
@@ -232,45 +241,59 @@ UPDATE Other SET notes = '${}' WHERE otherid = '${}';
 -- Delete a completion of an Other Exercise
 DELETE FROM Other WHERE otherid = '${}';
 
--- Add a workout
-INSERT INTO Workouts (userid, workoutid, name) VALUES ('${}', '${}', '${}');
+-- Create a Workout
+    -- Create the Workout
+    INSERT INTO Workouts (userid, workoutid, name) VALUES ('${}', '${}', '${}');
 
--- Edit a workout
+    -- Create the default ungrouped Group to the Workout
+    INSERT INTO Groups (workoutid, groupid, name) VALUES ('${}', '${}', '');
+
+-- Edit a Workout
 UPDATE Workouts SET name = '${}' WHERE workoutid = '${}';
 
--- Delete a workout
+-- Delete a Workout
 DELETE FROM Workouts WHERE workoutid = '${}';
 
--- Get all workouts of a user
+-- Get all Workouts of a User
 SELECT * FROM Workouts WHERE userid = '${}';
 
--- Add an exercise to a workout
+-- Create a Group
+INSERT INTO Groups (workoutid, groupid, name) VALUES ('${}', '${}', '${}');
+
+-- Edit a Group
+UPDATE Groups SET name = '${}' WHERE groupid = '${}';
+
+-- Delete a Group
+DELETE FROM Groups WHERE groupid = '${}';
+
+-- Get all Groups of a Workout
+SELECT groupid, name FROM Groups WHERE workoutid = '${}';
+
+-- Add an Exercise to a Group
 INSERT INTO Contains (workoutid, exerciseid) VALUES ('${}', '${}');
 
--- Remove an exercise from a workout
+-- Remove an Exercise from a Group
 DELETE FROM Contains WHERE workoutid = '${}' AND exerciseid = '${}';
 
--- Get all Exercises of a workout
-    -- Get all Weightlifting Exercises of a Workout
+-- Get all Exercises of a Group
+    -- Get all Weightlifting Exercises of a Group
     SELECT * FROM (
-        SELECT exerciseid FROM Contains WHERE workoutid = '${}'
+        SELECT exerciseid FROM Contains WHERE groupid = '${}'
     ) AS Temp1 JOIN (
-        SELECT * FROM (
-            WITH RecentHistory AS (
-                Select *, Row_Number() Over (
-                    Partition By exerciseid Order By completedDate Desc
-                ) RowNum From (
-                    SELECT * FROM (
-                        SELECT * FROM Exercises WHERE userid = '${}'
-                    ) AS Temp2 JOIN Weightlifting USING(exerciseid)
-                ) AS Temp3
-            ) SELECT * FROM RecentHistory WHERE RowNum = 1
-        ) AS Temp4 JOIN Sets Using(weightliftingid)
-    ) AS Temp5 USING(exerciseid);
+        WITH RecentHistory AS (
+            Select *, Row_Number() Over (
+                Partition By exerciseid Order By completedDate Desc
+            ) RowNum From (
+                SELECT * FROM (
+                    SELECT * FROM Exercises WHERE userid = '${}'
+                ) AS Temp2 JOIN Weightlifting USING(exerciseid)
+            ) AS Temp3
+        ) SELECT * FROM RecentHistory WHERE RowNum = 1
+    ) AS Temp4 USING(exerciseid);
 
-    -- Get all Cardio Exercises of a Workout
+    -- Get all Cardio Exercises of a Group
     SELECT * FROM (
-        SELECT exerciseid FROM Contains WHERE workoutid = '${}'
+        SELECT exerciseid FROM Contains WHERE groupid = '${}'
     ) AS Temp1 JOIN (
         WITH RecentHistory AS (
             Select *, Row_Number() Over (
@@ -283,9 +306,9 @@ DELETE FROM Contains WHERE workoutid = '${}' AND exerciseid = '${}';
         ) SELECT * FROM RecentHistory WHERE RowNum = 1
     ) AS Temp4 USING(exerciseid);
 
-    -- Get all Other Exercises of a Workout
+    -- Get all Other Exercises of a Group
     SELECT * FROM (
-        SELECT exerciseid FROM Contains WHERE workoutid = '${}'
+        SELECT exerciseid FROM Contains WHERE groupid = '${}'
     ) AS Temp1 JOIN (
         WITH RecentHistory AS (
             Select *, Row_Number() Over (
@@ -345,8 +368,14 @@ INSERT INTO Other (exerciseid, otherid, completedDate) VALUES
 INSERT INTO Workouts (userid, workoutid) VALUES 
     ('u1', 'wo1'),
     ('u2', 'wo2');
-INSERT INTO Contains (workoutid, exerciseid) VALUES 
-    ('wo1', 'e1'),
-    ('wo1', 'e3'),
-    ('wo1', 'e5'),
-    ('wo2', 'e11');
+INSERT INTO Groups (workoutid, groupid, name) VALUES 
+    ('wo1', 'g1', 'wo1g1'),
+    ('wo1', 'g2', 'wo1g2'),
+    ('wo2', 'g3', 'wo2g3'),
+    ('wo2', 'g4', 'wo2g4');
+INSERT INTO Contains (groupid, exerciseid) VALUES 
+    ('g1', 'e1'),
+    ('g1', 'e2'),
+    ('g2', 'e3'),
+    ('g3', 'e5'),
+    ('g4', 'e11');

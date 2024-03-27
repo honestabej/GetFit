@@ -9,10 +9,8 @@ const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const session = require('express-session')
 const {Client} = require('pg')
-const { response } = require('express')
 
 /***** Connect to the server *****/
-const PORT = process.env.PORT || 3001
 const client = new Client({
   host: "localhost",
   port: 5432,
@@ -617,16 +615,24 @@ app.delete('/other/delete', (req, res) => {
 })
 
 /*** Workout Endpoints ***/
-// Create a Workout
+// Create a Workout 
 app.post('/workout/create', (req, res) => {
   let workoutid = uuid()
+  let groupid = uuid()
 
-  client.query(`INSERT INTO Workouts (userid, workoutid, name) VALUES ('${req.body.userid}', '${workoutid}', '${req.body.name}');`, async (err, response) => {
-    if (!err) {
-      logging(res, '', "Workout created successfully", true)
-    } else {
-      logging(res, '', "Error @: Inserting new Workout info -> "+err.message, false)
-    }
+  client.query('BEGIN', (err, response) => {
+    if(err) return rollback(client, res, {loggedIn: false, error: "Error creating workout, please try again later", errNum: 1, errMsg: "Error @: Beginning workout creation -> "+err.message}) // err1
+    client.query(`INSERT INTO Workouts (userid, workoutid, name) VALUES ('${req.body.userid}', '${workoutid}', '${req.body.name}');`, (err, response) => {
+      if(err) return rollback(client, res, {loggedIn: false, error: "Error creating workout, please try again later", errNum: 2, errMsg: "Error @: Inserting new workout -> "+err.message}) // err2
+      client.query(`INSERT INTO Groups (workoutid, groupid, name) VALUES ('${workoutid}', '${groupid}', '');`,  (err, response) => {
+        if(!err) { 
+          client.query('COMMIT')
+          logging(res, '', "Workout created successfully", true)
+        } else {
+          rollback(client, res, {loggedIn: false, error: "Error creating workout, please try again later", errNum: 3, errMsg: "Error @: Inserting new default group -> "+err.message})  // err3
+        }
+      })
+    })
   })
   client.end
 })
@@ -667,41 +673,92 @@ app.get('/workout/get-all', (req, res) => {
   client.end
 })
 
+/*** Groups Endpoints ***/
+// Create a Group for a Workout
+app.post('/group/create', (req, res) => {
+  let groupid = uuid()
+
+  client.query(`INSERT INTO Groups (workoutid, groupid, name) VALUES ('${req.body.workoutid}', '${groupid}', '${req.body.name}');`, async (err, response) => {
+    if (!err) {
+      logging(res, '', "Group created successfully", true)
+    } else {
+      logging(res, '', "Error @: Inserting new Group -> "+err.message, false)
+    }
+  })
+  client.end
+})
+
+// Edit a Group
+app.put('/group/edit', (req, res) => {
+  client.query(`UPDATE Groups SET name = '${req.body.name}' WHERE groupid = '${req.body.groupid}';`, async (err, response) => {
+    if (!err) {
+      logging(res, '', "Group edited successfully", true)
+    } else {
+      logging(res, '', "Error @: Editing Group -> "+err.message, false)
+    }
+  })
+  client.end
+})
+
+// Delete a Group
+app.delete('/group/delete', (req, res) => {
+  client.query(`DELETE FROM Groups WHERE groupid = '${req.body.groupid}';`, async (err, response) => {
+    if (!err) {
+      logging(res, '', "Group deleted successfully", true)
+    } else {
+      logging(res, '', "Error @: Deleting Group -> "+err.message, false)
+    }
+  })
+  client.end
+})
+
+// Get all Groups of a Workout
+app.get('/group/get-all', (req, res) => {
+  client.query(`SELECT groupid, name FROM Groups WHERE workoutid = '${req.query.workoutid}';`, async (err, response) => {
+    if (!err) {
+      logging(res, response.rows, 'Workout '+req.query.workoutid+' Groups retrieved successfully', true)
+    } else {
+      logging(res, '', "Error @: Getting all Workout Groups -> "+err.message , false)
+    }
+  })
+  client.end
+})
+
 /*** Contains Endpoints ***/
-// Add an Exercise to a Workout
+// Add an Exercise to a Group
 app.post('/contains/add', (req, res) => {
-  client.query(`INSERT INTO Contains (workoutid, exerciseid) VALUES ('${req.body.workoutid}', '${req.body.exerciseid}');`, async (err, response) => {
+  client.query(`INSERT INTO Contains (groupid, exerciseid) VALUES ('${req.body.groupid}', '${req.body.exerciseid}');`, async (err, response) => {
     if (!err) {
-      logging(res, '', "Exercise added to Workout successfully", true)
+      logging(res, '', "Exercise added to Group successfully", true)
     } else {
-      logging(res, '', "Error @: Adding Exercise to Workout -> "+err.message, false)
+      logging(res, '', "Error @: Adding Exercise to Group -> "+err.message, false)
     }
   })
   client.end
 })
 
-// Delete an Exercise from a Workout
+// Delete an Exercise from a Group
 app.delete('/contains/delete', (req, res) => {
-  client.query(`DELETE FROM Contains WHERE workoutid = '${req.query.workoutid}' AND exerciseid = '${req.query.exerciseid}';`, async (err, response) => {
+  client.query(`DELETE FROM Contains WHERE groupid = '${req.query.groupid}' AND exerciseid = '${req.query.exerciseid}';`, async (err, response) => {
     if (!err) {
-      logging(res, '', "Exercise deleted from Workout successfully", true)
+      logging(res, '', "Exercise deleted from Group successfully", true)
     } else {
-      logging(res, '', "Error @: Deleting Exercise from Workout -> "+err.message, false)
+      logging(res, '', "Error @: Deleting Exercise from Group -> "+err.message, false)
     }
   })
   client.end
 })
 
-// Get all Exercises of a Workout
+// Get all Exercises of a Group
 app.get('/contains/get-all', (req, res) => {
   let exercisesObj = []
 
   client.query('BEGIN', (err, response) => {
     if(err) return rollback(client, res, {loggedIn: false, error: "Error getting exercises, please try again later", errNum: 1, errMsg: "Error @: Beginning get exercises -> "+err.message}) // err1
     // Query Weightlifting Exercises
-    client.query(`SELECT * FROM (SELECT exerciseid FROM Contains WHERE workoutid = '${req.query.workoutid}') AS Temp1 JOIN (SELECT * FROM (WITH RecentHistory AS (Select *, Row_Number() Over (Partition By exerciseid Order By 
+    client.query(`SELECT * FROM (SELECT exerciseid FROM Contains WHERE groupid = '${req.query.groupid}') AS Temp1 JOIN (WITH RecentHistory AS (Select *, Row_Number() Over (Partition By exerciseid Order By 
       completedDate Desc) RowNum From (SELECT * FROM (SELECT * FROM Exercises WHERE userid = '${req.query.userid}') AS Temp2 JOIN Weightlifting USING(exerciseid)) AS Temp3) SELECT * FROM RecentHistory WHERE RowNum = 1) 
-      AS Temp4 JOIN Sets Using(weightliftingid)) AS Temp5 USING(exerciseid);`, (err, response) => {
+      AS Temp4 USING(exerciseid);`, (err, response) => {
       if(err) {
         return rollback(client, res, {loggedIn: false, error: "Error getting exercises, please try again later", errNum: 2, errMsg: "Error @: Getting Weightlifting Exercises -> "+err.message}) // err2
       } else {
@@ -710,7 +767,7 @@ app.get('/contains/get-all', (req, res) => {
         }
       }
       // Query Cardio Exercises
-      client.query(`SELECT * FROM (SELECT exerciseid FROM Contains WHERE workoutid = '${req.query.workoutid}') AS Temp1 JOIN (WITH RecentHistory AS (Select *, Row_Number() Over (Partition By exerciseid Order By 
+      client.query(`SELECT * FROM (SELECT exerciseid FROM Contains WHERE groupid = '${req.query.groupid}') AS Temp1 JOIN (WITH RecentHistory AS (Select *, Row_Number() Over (Partition By exerciseid Order By 
         completedDate Desc) RowNum From (SELECT * FROM (SELECT * FROM Exercises WHERE userid = '${req.query.userid}') AS Temp2 JOIN Cardio USING(exerciseid)) AS Temp3) SELECT * FROM RecentHistory WHERE RowNum = 1)
         AS Temp4 USING(exerciseid);`, (err, response) => {
         if(err) {
@@ -721,7 +778,7 @@ app.get('/contains/get-all', (req, res) => {
           }
         }
         // Query Other Exercises
-        client.query(`SELECT * FROM (SELECT exerciseid FROM Contains WHERE workoutid = '${req.query.workoutid}') AS Temp1 JOIN (WITH RecentHistory AS (Select *, Row_Number() Over (Partition By exerciseid Order By 
+        client.query(`SELECT * FROM (SELECT exerciseid FROM Contains WHERE groupid = '${req.query.groupid}') AS Temp1 JOIN (WITH RecentHistory AS (Select *, Row_Number() Over (Partition By exerciseid Order By 
           completedDate Desc) RowNum From (SELECT * FROM (SELECT * FROM Exercises WHERE userid = '${req.query.userid}') AS Temp2 JOIN Other USING(exerciseid)) AS Temp3) SELECT * FROM RecentHistory WHERE RowNum = 1) 
           AS Temp4 USING(exerciseid);`, (err, response) => {
           if(err) {
